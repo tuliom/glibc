@@ -1,3 +1,17 @@
+2014-03-17  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+	    Tulio Magno Quites Machado Filho  <tuliom@linux.vnet.ibm.com>
+
+	* sysdeps/powerpc/tls.h (tcbhead_t): Add tm_capable field.
+	(TLS_INIT_TP): Add tm_capable initialization.
+	(THREAD_GET_TM_CAPABLE): Get tm_capable field value from TCB.
+	(THREAD_SET_TM_CAPABLE): Set tm_capable field value in TCB.
+	* sysdeps/powerpc/tcb-offsets.sym (TM_CAPABLE): Add field
+	offset calculation.
+	* sysdeps/pthread/createthread.c (do_clone): Provide a way to
+	setup TLS before calling clone.
+	* sysdeps/unix/sysv/linux/powerpc/createthread.c: Add tm_capable
+	initialization.
+
 2014-01-20  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
 
 	* sysdeps/unix/sysv/linux/powerpc/Makefile [nptl]

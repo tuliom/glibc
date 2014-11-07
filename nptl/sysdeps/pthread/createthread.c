@@ -72,6 +72,12 @@ do_clone (struct pthread *pd, const struct pthread_attr *attr,
      that cares whether the thread count is correct.  */
   atomic_increment (&__nptl_nthreads);
 
+  /* Some architectures need to setup values in the TLS before calling
+     clone().  */
+#ifdef TLS_SETUP
+  TLS_SETUP(TLS_VALUE);
+#endif
+
   int rc = ARCH_CLONE (fct, STACK_VARIABLES_ARGS, clone_flags,
 		       pd, &pd->tid, TLS_VALUE, &pd->tid);
 

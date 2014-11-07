@@ -20,5 +20,12 @@
 #define TLS_VALUE ((void *) (pd) \
 		   + TLS_TCB_OFFSET + TLS_PRE_TCB_SIZE)
 
+#ifdef ENABLE_LOCK_ELISION
+/* Setup dynamically stack_guard values.  */
+# define TLS_SETUP(tp)						\
+  (((tcbhead_t *) ((char *) tp - TLS_TCB_OFFSET))[-1].tm_capable) =	\
+    THREAD_GET_TM_CAPABLE ();
+#endif
+
 /* Get the real implementation.	 */
 #include <nptl/sysdeps/pthread/createthread.c>

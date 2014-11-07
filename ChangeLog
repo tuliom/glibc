@@ -1,5 +1,27 @@
 2014-01-20  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
 
+	* sysdeps/powerpc/powerpc32/sysdep.h (DO_CALL): Abort hardware
+	transactoion is lock elision is built and TCB tm_capable is set.
+	* sysdeps/powerpc/powerpc64/sysdep.h (DO_CALL): Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc32/sysdep.h
+	(INTERNAL_SYSCALL_NCS): Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/sysdep.h
+	(INTERNAL_SYSCALL_NCS): Likewise.
+	* sysdeps/powerpc/sysdep.h (ABORT_TRANSACTION): New define.
+
+2014-01-20  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	* sysdeps/powerpc/powerpc32/sysdep.h (DO_CALL): Abort hardware
+	transactoion is lock elision is built and TCB tm_capable is set.
+	* sysdeps/powerpc/powerpc64/sysdep.h (DO_CALL): Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc32/sysdep.h
+	(INTERNAL_SYSCALL_NCS): Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/sysdep.h
+	(INTERNAL_SYSCALL_NCS): Likewise.
+	* sysdeps/powerpc/sysdep.h (ABORT_TRANSACTION): New define.
+
+2014-01-20  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
 	* NEWS: Update.
 
 2015-03-10  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
