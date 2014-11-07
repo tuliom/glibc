@@ -1,3 +1,7 @@
+2014-01-20  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	* NEWS: Update.
+
 2015-03-10  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
 
 	* sysdeps/ieee754/dbl-64/Makefile (CFLAGS-e_pow.c): Add

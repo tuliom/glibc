@@ -14,6 +14,13 @@ Version 2.19.1
   16943, 16958, 17031, 17048, 17069, 17137, 17153, 17187, 17213, 17263,
   17325, 17555, 17625, 17630, 18104.
 
+* Added support for TSX lock elision of pthread mutexes on powerpc32, powerpc64
+  and powerpc64le.  This may improve lock scaling of existing programs on
+  HTM capable systems.  The lock elision code is only enabled with
+  --enable-lock-elision=yes.  Also, the TSX lock elision implementation for
+  powerpc will issue a transaction abort on every syscall to avoid side
+  effects being visible outside transactions.
+
 * CVE-2104-7817 The wordexp function could ignore the WRDE_NOCMD flag
   under certain input conditions resulting in the execution of a shell for
   command substitution when the applicaiton did not request it. The
