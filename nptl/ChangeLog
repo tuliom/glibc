@@ -1,3 +1,16 @@
+2014-01-20  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	* nptl/sysdeps/unix/sysv/linux/powerpc/elide.h: New file: generic
+	lock elision support for powerpc.
+	* nptl/sysdeps/unix/sysv/linux/powerpc/bits/pthreadtypes.h
+	[pthread_rwlock_t] (__pad1): Change size to 7 bytes in 64 bits case
+	and remove it for 32 bits case.
+	[pthread_rwlock_t] (__rwelision): New field for lock elision.
+	(__PTHREAD_RWLOCK_ELISION_EXTRA): Adjust for new lock elision field
+	initialization.
+	* nptl/sysdeps/unix/sysv/linux/powerpc/elision-conf.c (elision_init):
+	Disable lock elision with rdlocks if elision is not available.
+
 2015-02-12  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
 
 	* sysdeps/unix/sysv/linux/powerpc/htm.h [TABORT]: Fix
