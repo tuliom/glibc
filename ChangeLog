@@ -1,3 +1,10 @@
+2014-12-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* sysdeps/i386/dl-machine.h (_dl_start_user): Remove @PLT
+	from "call _dl_init@PLT".
+	* sysdeps/x86_64/dl-machine.h (_dl_start_user): Likewise.
+	from "call _dl_init@PLT".
+
 2014-12-20  Chris Metcalf  <cmetcalf@ezchip.com>
 
 	* sysdeps/unix/sysv/linux/tile/localplt.data: New file.
