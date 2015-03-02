@@ -220,7 +220,11 @@ tests += tst-pie1 tst-pie2
 tests-pie += tst-pie1 tst-pie2
 tests += vismain
 tests-pie += vismain
+ifeq (yes,$(have-mcopyreloc-in-pie))
+CFLAGS-vismain.c = $(PIE-ccflag) -mno-copyreloc-in-pie
+else
 CFLAGS-vismain.c = $(PIE-ccflag)
+endif
 endif
 modules-execstack-yes = tst-execstack-mod
 extra-test-objs += $(addsuffix .os,$(strip $(modules-names)))

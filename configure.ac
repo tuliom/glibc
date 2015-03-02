@@ -1427,6 +1427,13 @@ LIBC_TRY_CC_OPTION([-fpie], [libc_cv_fpie=yes], [libc_cv_fpie=no])
 
 AC_SUBST(libc_cv_fpie)
 
+AC_CACHE_CHECK(for -mcopyreloc-in-pie, libc_cv_mcopyreloc_in_pie, [dnl
+LIBC_TRY_CC_OPTION([-mcopyreloc-in-pie],
+		   [libc_cv_mcopyreloc_in_pie=yes],
+		   [libc_cv_mcopyreloc_in_pie=no])
+])
+AC_SUBST(libc_cv_mcopyreloc_in_pie)
+
 AC_CACHE_CHECK(for --hash-style option,
 	       libc_cv_hashstyle, [dnl
 cat > conftest.c <<EOF
