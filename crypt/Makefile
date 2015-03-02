@@ -58,10 +58,19 @@ md5-routines := md5 $(filter md5%,$(libcrypt-sysdep_routines))
 sha256-routines := sha256 $(filter sha256%,$(libcrypt-sysdep_routines))
 sha512-routines := sha512 $(filter sha512%,$(libcrypt-sysdep_routines))
 
-$(objpfx)md5test: $(patsubst %, $(objpfx)%.o,$(md5-routines))
-$(objpfx)md5test-giant: $(patsubst %, $(objpfx)%.o,$(md5-routines))
-$(objpfx)sha256test: $(patsubst %, $(objpfx)%.o,$(sha256-routines))
-$(objpfx)sha512test: $(patsubst %, $(objpfx)%.o,$(sha512-routines))
+# When compiler defaults to PIE, we compile archives with -fno-pie and
+# we can't link tests against .o files for archives.  We need to link
+# against .os files for shared libraries.
+ifeq (yes,$(build-pie-default))
+crypt-suffix := .os
+else
+crypt-suffix := .o
+endif
+
+$(objpfx)md5test: $(patsubst %, $(objpfx)%$(crypt-suffix),$(md5-routines))
+$(objpfx)md5test-giant: $(patsubst %, $(objpfx)%$(crypt-suffix),$(md5-routines))
+$(objpfx)sha256test: $(patsubst %, $(objpfx)%$(crypt-suffix),$(sha256-routines))
+$(objpfx)sha512test: $(patsubst %, $(objpfx)%$(crypt-suffix),$(sha512-routines))
 endif
 
 ifeq (yes,$(build-shared))
