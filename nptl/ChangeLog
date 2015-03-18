@@ -1,3 +1,8 @@
+2015-03-18  Tulio Magno Quites Machado Filho  <tuliom@linux.vnet.ibm.com>
+
+	* tst-cond20.c (TIMEOUT): Increase value.
+	* tst-cond24.c (TIMEOUT): Likewise.
+
 2014-01-20  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
 
 	* nptl/sysdeps/unix/sysv/linux/powerpc/elide.h: New file: generic
