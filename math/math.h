@@ -63,6 +63,9 @@ __BEGIN_DECLS
 #  define SNAN (__builtin_nans (""))
 #  define SNANL (__builtin_nansl (""))
 # endif
+# if __USE_FLOAT128
+#  define SNANF128 (__builtin_nansf128 (""))
+# endif
 #endif
 
 /* Get __GLIBC_FLT_EVAL_METHOD.  */

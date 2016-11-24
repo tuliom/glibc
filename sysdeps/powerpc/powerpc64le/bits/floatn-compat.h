@@ -49,6 +49,7 @@ typedef _Complex float __cfloat128 __attribute__ ((mode (KC)));
 #  define __builtin_fabsf128 __builtin_fabsq
 #  define __builtin_inff128 __builtin_infq
 #  define __builtin_nanf128 __builtin_nanq
+#  define __builtin_nansf128 __builtin_nansq
 # endif
 
 /* __builtin_signbit is type generic in GCC 6.2, which is the minimum
