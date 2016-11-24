@@ -14,6 +14,7 @@ libm {
     cabsf128;
     cacosf128;
     cacoshf128;
+    canonicalizef128;
     cargf128;
     casinf128;
     casinhf128;
@@ -118,6 +119,7 @@ libm {
     __fpclassifyf128;
     __gammaf128_r_finite;
     __hypotf128_finite;
+    __iscanonicalf128;
     __iseqsigf128;
     __isinff128;
     __isnanf128;

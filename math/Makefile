@@ -120,7 +120,7 @@ type-float-routines := k_rem_pio2f
 
 # _Float128 support
 type-float128-suffix := f128
-type-float128-routines := t_sincosf128 k_sincosf128
+type-float128-routines := t_sincosf128 k_sincosf128 s_iscanonicalf128
 type-float128-yes := float128
 types = $(types-basic) $(type-float128-$(float128-fcts))
 
