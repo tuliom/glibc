@@ -659,6 +659,19 @@ extern int matherr (struct exception *__exc);
 #  endif
 
 # endif /* __USE_ISOC99.  */
+
+/* Include bits/math-finite.h for float128.  */
+# if __USE_FLOAT128
+#  define _Mdouble_ _Float128
+#  define __MATH_DECLARING_DOUBLE 0
+#  define __MATH_DECLARING_LDOUBLE 0
+#  define _MSUF_ f128
+#  include <bits/math-finite.h>
+#  undef _Mdouble_
+#  undef __MATH_DECLARING_DOUBLE
+#  undef __MATH_DECLARING_LDOUBLE
+#  undef _MSUF_
+# endif
 #endif /* __FINITE_MATH_ONLY__ > 0.  */
 
 #ifdef __USE_ISOC99
