@@ -121,6 +121,7 @@
 #define __ieee754_coshl __ieee754_coshf128
 #define __ieee754_cosl __ieee754_cosf128
 #define __ieee754_exp10l __ieee754_exp10f128
+#define __ieee754_exp2l __ieee754_exp2f128
 #define __ieee754_expl __ieee754_expf128
 #define __ieee754_fmodl __ieee754_fmodf128
 #define __ieee754_gammal_r __ieee754_gammaf128_r
@@ -152,6 +153,7 @@
 #define __coshl_finite __coshf128_finite
 #define __cosl_finite __cosf128_finite
 #define __exp10l_finite __exp10f128_finite
+#define __exp2l_finite __exp2f128_finite
 #define __expl_finite __expf128_finite
 #define __fmodl_finite __fmodf128_finite
 #define __hypotl_finite __hypotf128_finite
