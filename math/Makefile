@@ -383,7 +383,7 @@ endif
 
 libm-test-fast-math-cflags = -fno-builtin -D__FAST_MATH__ -DTEST_FAST_MATH
 libm-test-vec-cflags = $(libm-test-fast-math-cflags) -fno-inline \
-		       -ffloat-store -D_OPENMP=201307 -Wno-unknown-pragmas
+		       -D_OPENMP=201307 -Wno-unknown-pragmas
 
 CFLAGS-test-double-vlen4-wrappers.c += $(double-vlen4-arch-ext-cflags)
 
@@ -399,7 +399,7 @@ CFLAGS-test-float-vlen16-wrappers.c += $(float-vlen16-arch-ext-cflags)
 # raise spurious exceptions for sNaNs, but also do not test for
 # exceptions.  Thus both versions of the classification macros are
 # validated.
-libm-test-no-inline-cflags = -fno-inline -ffloat-store -fno-builtin \
+libm-test-no-inline-cflags = -fno-inline -fno-builtin \
 			     -fsignaling-nans
 libm-test-finite-cflags = $(libm-test-no-inline-cflags) \
 			  -U__FINITE_MATH_ONLY__ -D__FINITE_MATH_ONLY__=1
