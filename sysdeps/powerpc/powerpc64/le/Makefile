@@ -49,9 +49,10 @@ $(foreach test,\
 	  test-tgmath2 \
 	  tst-CMPLX2 \
 	  test-%-ldbl-128ibm \
-	  test-ibm128% test-ldouble% test-ildouble% \
+	  test-ldouble% test-ildouble% \
 	  test-float128% test-ifloat128% \
 	  test-float64x% test-ifloat64x% \
+	  $(foreach pair,$(f128-pairs),test-$(pair)%) \
 	  ,$(objpfx)$(test)): \
   gnulib-tests += $(f128-loader-link)
 
@@ -91,11 +92,23 @@ CFLAGS-tst-strfrom-locale.c += -mfloat128
 CFLAGS-strfrom-skeleton.c += -mfloat128
 CFLAGS-tst-strtod-nan-sign.c += -mfloat128
 CFLAGS-tst-wcstod-nan-sign.c += -mfloat128
-$(foreach test,bug-strtod bug-strtod2 bug-strtod2 tst-strtod-round \
-tst-wcstod-round tst-strtod6 tst-strrom tst-strfrom-locale \
-tst-strtod-nan-locale tst-wcstod-nan-locale \
-strfrom-skeleton tst-strtod-nan-sign tst-wcstod-nan-sign, \
-$(objpfx)$(test)): gnulib-tests += $(f128-loader-link)
+
+$(foreach test, \
+	  bug-strtod \
+	  bug-strtod2 \
+	  strfrom-skeleton \
+	  tst-strfrom-locale \
+	  tst-strrom \
+	  tst-strtod \
+	  tst-strtod-nan-locale \
+	  tst-strtod-nan-sign \
+	  tst-strtod-round \
+	  tst-strtod6 \
+	  tst-wcstod-nan-locale \
+	  tst-wcstod-nan-sign \
+	  tst-wcstod-round \
+	  ,$(objpfx)$(test)): \
+  gnulib-tests += $(f128-loader-link)
 
 # When building glibc with support for _Float128, the powers of ten tables in
 # fpioconst.c and in the string conversion functions must be extended.  Some
@@ -116,6 +129,12 @@ ifeq ($(subdir),stdio-common)
 CFLAGS-printf_fp.c = -mfloat128
 CFLAGS-printf_fphex.c = -mfloat128
 CFLAGS-printf_size.c = -mfloat128
+$(foreach test, \
+	  tst-sprintf2 \
+	  tst-sprintf3 \
+	  tstdiomisc \
+	  ,$(objpfx)$(test)): \
+  gnulib-tests += $(f128-loader-link)
 endif
 
 $(foreach suf,$(all-object-suffixes),$(objpfx)nldbl-%$(suf)): \
