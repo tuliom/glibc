@@ -6,6 +6,9 @@
 # linked executables, forcing to link the loader after libgcc link.
 f128-loader-link = $(as-needed) $(elf-objpfx)ld.so $(no-as-needed)
 
+# Build everything with IEEE 128-bit long double.
+sysdep-CFLAGS += -mabi=ieeelongdouble -Wno-psabi
+
 ifeq ($(subdir),math)
 # sqrtf128 requires emulation before POWER9.
 CPPFLAGS += -I../soft-fp
@@ -54,6 +57,14 @@ $(foreach test,\
 
 
 type-ldouble-CFLAGS = -mabi=ibmlongdouble
+
+CFLAGS-s_logbl-power7.c += $(type-ldouble-CFLAGS)
+CFLAGS-s_logbl-ppc64.c += $(type-ldouble-CFLAGS)
+
+$(foreach suf,$(all-object-suffixes),\
+          $(objpfx)s_copysignl$(suf) \
+          $(objpfx)s_fabsl$(suf)): \
+  ASFLAGS += -mabi=ibmlongdouble
 
 $(foreach suf,$(all-object-suffixes),\
          $(objpfx)libm-test-%ibm128$(suf) \
@@ -107,12 +118,16 @@ CFLAGS-printf_fphex.c = -mfloat128
 CFLAGS-printf_size.c = -mfloat128
 endif
 
-$(foreach suf,$(all-object-suffixes),nldbl-%$(suf)): \
+$(foreach suf,$(all-object-suffixes),$(objpfx)nldbl-%$(suf)): \
   CFLAGS += -mabi=ibmlongdouble
 
-sysdep-CFLAGS += -mabi=ieeelongdouble -Wno-psabi
-$(foreach suf,$(all-object-suffixes),\
-         $(objpfx)libm-test-%ibm128$(suf) \
-         $(objpfx)test-iibm128%$(suf) $(objpfx)test-ibm128%$(suf)): \
-  sysdep-CFLAGS := $(filter-out -mabi=ieeelongdouble \
-    -Wno-psabi, $(sysdep-CFLAGS))
+ldbl-ibm128-files = $(objpfx)nldbl-%$(suf) \
+		    $(objpfx)libm-test-%ibm128$(suf) \
+		    $(objpfx)test-iibm128%$(suf) $(objpfx)test-ibm128%$(suf) \
+		    $(objpfx)test-tgmath3-%$(suf) \
+# Removes -mabi=ieeelongdouble from ldbl-ibm128 files.  This is not required,
+# but helps when analyzing the flags that were passed to the compiler.
+$(foreach suf,$(all-object-suffixes), $(ldbl-ibm128-files)) \
+$(foreach r,$(ldbl-128ibm-routines) $(ldbl-tests), $(objpfx)$(r)$(suf)): \
+  sysdep-CFLAGS := $(filter-out -mabi=ieeelongdouble -Wno-psabi, \
+				$(sysdep-CFLAGS))
