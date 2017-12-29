@@ -98,7 +98,7 @@ $(foreach test, \
 	  bug-strtod2 \
 	  strfrom-skeleton \
 	  tst-strfrom-locale \
-	  tst-strrom \
+	  tst-strfrom \
 	  tst-strtod \
 	  tst-strtod-nan-locale \
 	  tst-strtod-nan-sign \
@@ -116,19 +116,20 @@ $(foreach test, \
 # sysdeps.  This is avoided with the use sysdep-CFLAGS instead of CFLAGS.
 sysdep-CFLAGS += $(sysdep-CFLAGS-$(<F))
 sysdep-CFLAGS-fpioconst.c += -mfloat128
-sysdep-CFLAGS-strtod_l.c += -mfloat128
-sysdep-CFLAGS-strtof_l.c += -mfloat128
-sysdep-CFLAGS-strtold_l.c += -mfloat128
 sysdep-CFLAGS-wcstod_l.c += -mfloat128
 sysdep-CFLAGS-wcstof_l.c += -mfloat128
 sysdep-CFLAGS-wcstold_l.c += -mfloat128
+$(foreach suf,$(all-object-suffixes),\
+         $(objpfx)strfro%$(suf) $(objpfx)strto%$(suf)): \
+  sysdep-CFLAGS += -mabi=ibmlongdouble
+
 endif
 
 # Append flags to printf routines.
 ifeq ($(subdir),stdio-common)
-CFLAGS-printf_fp.c = -mfloat128
-CFLAGS-printf_fphex.c = -mfloat128
-CFLAGS-printf_size.c = -mfloat128
+CFLAGS-printf_fp.c = -mabi=ibmlongdouble
+CFLAGS-printf_fphex.c = -mabi=ibmlongdouble
+CFLAGS-printf_size.c = -mabi=ibmlongdouble
 $(foreach test, \
 	  tst-sprintf2 \
 	  tst-sprintf3 \

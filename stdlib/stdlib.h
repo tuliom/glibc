@@ -1022,6 +1022,10 @@ extern int ttyslot (void) __THROW;
 #ifdef __LDBL_COMPAT
 # include <bits/stdlib-ldbl.h>
 #endif
+#if !defined __LDBL_COMPAT \
+	&& __HAVE_DISTINCT_FLOAT128 && __LDBL_MANT_DIG__ == 113
+# include <bits/stdlib-ldbl.h>
+#endif
 
 __END_DECLS
 

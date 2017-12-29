@@ -204,7 +204,10 @@ libc_hidden_proto (____strtoull_l_internal)
 
 libc_hidden_proto (strtof)
 libc_hidden_proto (strtod)
+#if !__HAVE_DISTINCT_FLOAT128 \
+      || (__HAVE_DISTINCT_FLOAT128 && __HAVE_FLOAT128_UNLIKE_LDBL)
 libc_hidden_proto (strtold)
+#endif
 libc_hidden_proto (strtol)
 libc_hidden_proto (strtoll)
 libc_hidden_proto (strtoul)

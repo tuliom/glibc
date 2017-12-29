@@ -20,6 +20,7 @@
 # error "Never include <bits/stdlib-ldbl.h> directly; use <stdlib.h> instead."
 #endif
 
+#ifdef __LDBL_COMPAT
 #ifdef	__USE_ISOC99
 __LDBL_REDIR1_DECL (strtold, strtod)
 #endif
@@ -38,4 +39,15 @@ __LDBL_REDIR1_DECL (qfcvt, fcvt)
 __LDBL_REDIR1_DECL (qgcvt, gcvt)
 __LDBL_REDIR1_DECL (qecvt_r, ecvt_r)
 __LDBL_REDIR1_DECL (qfcvt_r, fcvt_r)
+#endif
+#elif __HAVE_DISTINCT_FLOAT128 && __LDBL_MANT_DIG__ == 113
+#ifdef  __USE_ISOC99
+__LDBL_REDIR1_DECL (strtold, __strtoieee128)
+#endif
+#ifdef __USE_GNU
+__LDBL_REDIR1_DECL (strtold_l, __strtoieee128_l)
+#endif
+#if __GLIBC_USE (IEC_60559_BFP_EXT)
+__LDBL_REDIR1_DECL (strfroml, __strfromieee128)
+#endif
 #endif

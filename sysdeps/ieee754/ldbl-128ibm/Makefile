@@ -7,6 +7,10 @@ sysdep-CFLAGS += -mlong-double-128
 ifeq ($(subdir),stdlib)
 tests += tst-strtold-ldbl-128ibm
 $(objpfx)tst-strtold-ldbl-128ibm: $(libm)
+CFLAGS-tst-strtold-ldbl-128ibm.c += -mabi=ibmlongdouble
+CFLAGS-strtold_l.c += -mabi=ibmlongdouble
+CFLAGS-mpn2ldbl.c += -mabi=ibmlongdouble
+CFLAGS-ldbl2mpn.c += -mabi=ibmlongdouble
 endif
 
 ldbl-tests = test-fmodl-ldbl-128ibm test-remainderl-ldbl-128ibm \
