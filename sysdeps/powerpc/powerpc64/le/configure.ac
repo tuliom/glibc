@@ -1,8 +1,8 @@
 GLIBC_PROVIDES dnl See aclocal.m4 in the top level source directory.
 # Local configure fragment for sysdeps/powerpc/powerpc64le.
 
-dnl Require binary128 floating point support on powerpc64le (available in
-dnl GCC 6.2).
+dnl Require long double that is binary compatible with binary128
+dnl floating point support on powerpc64le (available in GCC 7.0).
 AC_CACHE_CHECK([if $CC supports binary128 floating point type],
 	       libc_cv_compiler_powerpc64le_binary128_ok, [dnl
 save_CFLAGS="$CFLAGS"
@@ -14,20 +14,20 @@ int i;
 __float128
 foobar (__float128 x)
 {
-  a = __builtin_nansq ("0");
-  b = __builtin_huge_valq ();
-  c = __builtin_infq ();
-  d = __builtin_fabsq (x);
-  e = __builtin_nanq ("0");
+  a = __builtin_nansf128 ("0");
+  b = __builtin_huge_valf128 ();
+  c = __builtin_inff128 ();
+  d = __builtin_fabsf128 (x);
+  e = __builtin_nanf128 ("0");
   i = __builtin_signbit (x);
-  return __builtin_copysignq (x, x);
+  return __builtin_copysignf128 (x, x);
 }
 ]])],
 		  [libc_cv_compiler_powerpc64le_binary128_ok=yes],
 		  [libc_cv_compiler_powerpc64le_binary128_ok=no])
 CFLAGS="$save_CFLAGS"])
 AS_IF([test "$libc_cv_compiler_powerpc64le_binary128_ok" != "yes"],
-      [critic_missing="$critic_missing binary128 floating point type (GCC >= 6.2) is required on powerpc64le."])
+      [critic_missing="$critic_missing binary128 floating point type (GCC >= 7.0) is required on powerpc64le."])
 
 dnl Require at least POWER8 on powerpc64le
 OLD_CFLAGS="$CFLAGS"

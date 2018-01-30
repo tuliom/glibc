@@ -18,13 +18,13 @@ int i;
 __float128
 foobar (__float128 x)
 {
-  a = __builtin_nansq ("0");
-  b = __builtin_huge_valq ();
-  c = __builtin_infq ();
-  d = __builtin_fabsq (x);
-  e = __builtin_nanq ("0");
+  a = __builtin_nansf128 ("0");
+  b = __builtin_huge_valf128 ();
+  c = __builtin_inff128 ();
+  d = __builtin_fabsf128 (x);
+  e = __builtin_nanf128 ("0");
   i = __builtin_signbit (x);
-  return __builtin_copysignq (x, x);
+  return __builtin_copysignf128 (x, x);
 }
 
 _ACEOF
@@ -39,7 +39,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $libc_cv_compiler_powerpc64le_binary128_ok" >&5
 $as_echo "$libc_cv_compiler_powerpc64le_binary128_ok" >&6; }
 if test "$libc_cv_compiler_powerpc64le_binary128_ok" != "yes"; then :
-  critic_missing="$critic_missing binary128 floating point type (GCC >= 6.2) is required on powerpc64le."
+  critic_missing="$critic_missing binary128 floating point type (GCC >= 7.0) is required on powerpc64le."
 fi
 
 OLD_CFLAGS="$CFLAGS"
