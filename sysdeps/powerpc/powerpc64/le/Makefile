@@ -28,13 +28,37 @@ CFLAGS-test-math-iscanonical.cc += -mfloat128
 CFLAGS-test-math-iseqsig.cc += -mfloat128
 CFLAGS-test-math-issignaling.cc += -mfloat128
 CFLAGS-test-math-iszero.cc += -mfloat128
-$(foreach test, \
-	  test-float128% test-ifloat128% test-float64x% test-ifloat64x% \
-	  $(foreach pair,$(f128-pairs),test-$(pair)%) \
-	  test-math-iscanonical test-math-iseqsig test-math-issignaling \
-	  test-math-iszero, \
-	  $(objpfx)$(test)): \
+$(foreach test,\
+	  basic-test \
+	  bug-nextafter \
+	  bug-nexttoward \
+	  test-fenv-clear \
+	  test-iszero-excess-precision \
+	  test-math-iscanonical \
+	  test-math-iseqsig \
+	  test-math-issignaling \
+	  test-math-iszero \
+	  test-misc \
+	  test-nan-overflow \
+	  test-nan-payload \
+	  test-snan \
+	  test-tgmath \
+	  test-tgmath2 \
+	  tst-CMPLX2 \
+	  test-%-ldbl-128ibm \
+	  test-ibm128% test-ldouble% test-ildouble% \
+	  test-float128% test-ifloat128% \
+	  test-float64x% test-ifloat64x% \
+	  ,$(objpfx)$(test)): \
   gnulib-tests += $(f128-loader-link)
+
+
+type-ldouble-CFLAGS = -mabi=ibmlongdouble
+
+$(foreach suf,$(all-object-suffixes),\
+         $(objpfx)libm-test-%ibm128$(suf) \
+         $(objpfx)test-iibm128%$(suf) $(objpfx)test-ibm128%$(suf)): \
+  CFLAGS += -mabi=ibmlongdouble
 endif
 
 # Append flags to string <-> _Float128 routines.
@@ -82,3 +106,13 @@ CFLAGS-printf_fp.c = -mfloat128
 CFLAGS-printf_fphex.c = -mfloat128
 CFLAGS-printf_size.c = -mfloat128
 endif
+
+$(foreach suf,$(all-object-suffixes),nldbl-%$(suf)): \
+  CFLAGS += -mabi=ibmlongdouble
+
+sysdep-CFLAGS += -mabi=ieeelongdouble -Wno-psabi
+$(foreach suf,$(all-object-suffixes),\
+         $(objpfx)libm-test-%ibm128$(suf) \
+         $(objpfx)test-iibm128%$(suf) $(objpfx)test-ibm128%$(suf)): \
+  sysdep-CFLAGS := $(filter-out -mabi=ieeelongdouble \
+    -Wno-psabi, $(sysdep-CFLAGS))
