@@ -1,6 +1,6 @@
-/* Copyright (C) 2011-2018 Free Software Foundation, Inc.
+/* Multiply by integral power of radix.
+   Copyright (C) 2018 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
-   Contributed by Ulrich Drepper <drepper@gmail.com>, 2011.
 
    The GNU C Library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -19,36 +19,36 @@
 #include <math.h>
 #include <math_private.h>
 
-
-static float
+static FLOAT
 __attribute__ ((noinline))
-invalid_fn (float x, float fn)
+invalid_fn (FLOAT x, FLOAT fn)
 {
-  if (__rintf (fn) != fn)
+  if (M_SUF (__rint) (fn) != fn)
     return (fn - fn) / (fn - fn);
-  else if (fn > 65000.0f)
-    return __scalbnf (x, 65000);
+  else if (fn > M_LIT (65000.0))
+    return M_SUF (__scalbn) (x, 65000);
   else
-    return __scalbnf (x,-65000);
+    return M_SUF (__scalbn) (x,-65000);
 }
 
 
-float
-__ieee754_scalbf (float x, float fn)
+FLOAT
+M_DECL_FUNC (__ieee754_scalb) (FLOAT x, FLOAT fn)
 {
   if (__glibc_unlikely (isnan (x)))
     return x * fn;
   if (__glibc_unlikely (!isfinite (fn)))
     {
-      if (isnan (fn) || fn > 0.0f)
+      if (isnan (fn) || fn > M_LIT (0.0))
 	return x * fn;
-      if (x == 0.0f)
+      if (x == M_LIT (0.0))
 	return x;
       return x / -fn;
     }
-  if (__glibc_unlikely (fabsf (fn) >= 0x1p31f || (float) (int) fn != fn))
+  if (__glibc_unlikely (M_FABS (fn) >= M_LIT (0x1p31)
+			|| (FLOAT) (int) fn != fn))
     return invalid_fn (x, fn);
 
-  return __scalbnf (x, (int) fn);
+  return M_SCALBN (x, (int) fn);
 }
-strong_alias (__ieee754_scalbf, __scalbf_finite)
+declare_mgen_finite_alias (__ieee754_scalb, __scalb)

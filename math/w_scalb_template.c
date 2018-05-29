@@ -1,6 +1,6 @@
-/* Copyright (C) 2011-2018 Free Software Foundation, Inc.
+/* Wrapper to set errno for scalb.
+   Copyright (C) 2018 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
-   Contributed by Ulrich Drepper <drepper@gmail.com>, 2011.
 
    The GNU C Library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -16,44 +16,23 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
+/* Only build wrappers from the templates for the types that define the macro
+   below.  This macro is set in math-type-macros-<type>.h in sysdeps/generic
+   for each floating-point type.  */
+#if __USE_WRAPPER_TEMPLATE
+
 #include <errno.h>
 #include <math.h>
 #include <math_private.h>
-#include <math-svid-compat.h>
-
-
-#if LIBM_SVID_COMPAT
-static double
-__attribute__ ((noinline))
-sysv_scalb (double x, double fn)
-{
-  double z = __ieee754_scalb (x, fn);
-
-  if (__glibc_unlikely (isinf (z)))
-    {
-      if (isfinite (x))
-	return __kernel_standard (x, fn, 32); /* scalb overflow */
-      else
-	__set_errno (ERANGE);
-    }
-  else if (__builtin_expect (z == 0.0, 0) && z != x)
-    return __kernel_standard (x, fn, 33); /* scalb underflow */
-
-  return z;
-}
-
 
 /* Wrapper scalb */
-double
-__scalb (double x, double fn)
+FLOAT
+M_DECL_FUNC (__scalb) (FLOAT x, FLOAT fn)
 {
-  if (__glibc_unlikely (_LIB_VERSION == _SVID_))
-    return sysv_scalb (x, fn);
-  else
     {
-      double z = __ieee754_scalb (x, fn);
+      FLOAT z = M_SUF (__ieee754_scalb) (x, fn);
 
-      if (__glibc_unlikely (!isfinite (z) || z == 0.0))
+      if (__glibc_unlikely (!isfinite (z) || z == M_LIT (0.0)))
 	{
 	  if (isnan (z))
 	    {
@@ -68,16 +47,13 @@ __scalb (double x, double fn)
 	  else
 	    {
 	      /* z == 0.  */
-	      if (x != 0.0 && !isinf (fn))
+	      if (x != M_LIT (0.0) && !isinf (fn))
 		__set_errno (ERANGE);
 	    }
 	}
       return z;
     }
 }
-weak_alias (__scalb, scalb)
-# ifdef NO_LONG_DOUBLE
-strong_alias (__scalb, __scalbl)
-weak_alias (__scalb, scalbl)
-# endif
-#endif
+declare_mgen_alias (__scalb, scalb);
+
+#endif /* __USE_WRAPPER_TEMPLATE.  */
