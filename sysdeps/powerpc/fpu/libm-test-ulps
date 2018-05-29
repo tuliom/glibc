@@ -2085,32 +2085,40 @@ ldouble: 1
 Function: "gamma":
 double: 3
 float: 4
+float128: 5
 idouble: 3
 ifloat: 4
+ifloat128: 5
 ildouble: 3
 ldouble: 3
 
 Function: "gamma_downward":
 double: 4
 float: 4
+float128: 6
 idouble: 4
 ifloat: 4
+ifloat128: 6
 ildouble: 15
 ldouble: 15
 
 Function: "gamma_towardzero":
 double: 4
 float: 3
+float128: 5
 idouble: 4
 ifloat: 3
+ifloat128: 5
 ildouble: 16
 ldouble: 16
 
 Function: "gamma_upward":
 double: 4
 float: 5
+float128: 7
 idouble: 4
 ifloat: 5
+ifloat128: 7
 ildouble: 11
 ldouble: 11
 
