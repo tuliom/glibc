@@ -127,36 +127,29 @@ long double
 __fmal (long double x, long double y, long double z)
 {
   double xhi, xlo, yhi, ylo, zhi, zlo;
-  int64_t hx, hy, hz;
-  int xexp, yexp, zexp;
   double scale_val;
   int scale_exp;
   ldbl_unpack (x, &xhi, &xlo);
-  EXTRACT_WORDS64 (hx, xhi);
-  xexp = (hx & 0x7ff0000000000000LL) >> 52;
   ldbl_unpack (y, &yhi, &ylo);
-  EXTRACT_WORDS64 (hy, yhi);
-  yexp = (hy & 0x7ff0000000000000LL) >> 52;
   ldbl_unpack (z, &zhi, &zlo);
-  EXTRACT_WORDS64 (hz, zhi);
-  zexp = (hz & 0x7ff0000000000000LL) >> 52;
 
-  /* If z is Inf or NaN, but x and y are finite, avoid any exceptions
-     from computing x * y.  */
-  if (zexp == 0x7ff && xexp != 0x7ff && yexp != 0x7ff)
+  if (__glibc_unlikely (!isfinite (x) || !isfinite (y) || x == 0 || y == 0))
+    if (!isfinite (x) && !isfinite (y) && isfinite(z))
+      /* Compute the result as x * y to avoid an overflow.  */
+      return x * y;
+    else
+      /* If x or y is Inf, NaN or zero compute as x * y + z.  */
+      return (x * y) + z;
+  else if (__glibc_unlikely (!isfinite (z)))
+    /* If z is Inf, but x and y are finite, the result should be z
+       rather than NaN.  */
     return (z + x) + y;
 
-  /* If z is zero and x are y are nonzero, compute the result as x * y
+  /* If z is zero and x and y are nonzero, compute the result as x * y
      to avoid the wrong sign of a zero result if x * y underflows to
      0.  */
-  if (z == 0 && x != 0 && y != 0)
+  if (z == 0)
     return x * y;
-
-  /* If x or y or z is Inf/NaN, or if x * y is zero, compute as x * y
-     + z.  */
-  if (xexp == 0x7ff || yexp == 0x7ff || zexp == 0x7ff
-      || x == 0 || y == 0)
-    return (x * y) + z;
 
   {
     SET_RESTORE_ROUND (FE_TONEAREST);
