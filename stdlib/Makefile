@@ -90,6 +90,13 @@ tests-internal	:= tst-strtod1i tst-strtod3 tst-strtod4 tst-strtod5i \
 		   tst-tls-atexit tst-tls-atexit-nodelete
 tests-static	:= tst-secure-getenv
 
+ibm-tests	:= tst-strtod bug-strtod tst-strfrom bug-strtod2 \
+		   tst-strtod-round tst-strtod6 tst-strfrom-locale
+stdlib-ibm-tests = $(foreach t,$(ibm-tests),ibm128-$(t))
+
+$(foreach t,$(stdlib-ibm-tests),$(objpfx)$(t).c): $(objpfx)ibm128-%.c:
+	( echo "#include <$*.c>"; ) > $@
+tests += $(stdlib-ibm-tests)
 ifeq ($(build-hardcoded-path-in-tests),yes)
 tests += tst-empty-env
 endif
@@ -185,6 +192,8 @@ $(objpfx)tst-strfmon_l.out: $(gen-locales)
 $(objpfx)tst-strfrom.out: $(gen-locales)
 $(objpfx)tst-strfrom-locale.out: $(gen-locales)
 $(objpfx)test-dlclose-exit-race.out: $(objpfx)test-dlclose-exit-race-helper.so
+$(foreach t,$(stdlib-ibm-tests), (objpfx)$(t).out):
+	$(objpfx)$(t).out: $(gen-locales)
 endif
 
 # Testdir has to be named stdlib and needs to be writable
@@ -222,6 +231,9 @@ $(objpfx)tst-strtod-underflow: $(libm)
 $(objpfx)tst-strtod6: $(libm)
 $(objpfx)tst-strtod-nan-locale: $(libm)
 $(objpfx)tst-strtod-nan-sign: $(libm)
+$(objpfx)ibm128-bug-strtod2: $(libm)
+$(objpfx)ibm128-tst-strtod-round: $(libm)
+$(objpfx)ibm128-tst-strtod6: $(libm)
 
 tst-tls-atexit-lib.so-no-z-defs = yes
 test-dlclose-exit-race-helper.so-no-z-defs = yes

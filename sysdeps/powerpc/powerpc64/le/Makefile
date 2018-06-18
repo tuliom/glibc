@@ -96,6 +96,10 @@ CFLAGS-tst-wcstod-nan-sign.c += -mfloat128
 $(foreach test, \
 	  bug-strtod \
 	  bug-strtod2 \
+	  ibm128-bug-strtod \
+	  ibm128-bug-strtod2 \
+	  ibm128-tst-strtod6 \
+	  ibm128-tst-strtod-round \
 	  strfrom-skeleton \
 	  tst-strfrom-locale \
 	  tst-strfrom \
@@ -120,6 +124,7 @@ sysdep-CFLAGS-wcstod_l.c += -mfloat128
 sysdep-CFLAGS-wcstof_l.c += -mfloat128
 sysdep-CFLAGS-wcstold_l.c += -mfloat128
 $(foreach suf,$(all-object-suffixes),\
+	 $(objpfx)ibm128%$(suf) \
          $(objpfx)strfro%$(suf) $(objpfx)strto%$(suf)): \
   sysdep-CFLAGS += -mabi=ibmlongdouble
 
