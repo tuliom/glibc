@@ -50,13 +50,13 @@
 /* Trigonometric functions.  */
 
 /* Arc cosine of X.  */
-__MATHCALL (acos,, (_Mdouble_ __x));
+__MATHCALL_FINITE (acos,, (_Mdouble_ __x));
 /* Arc sine of X.  */
-__MATHCALL (asin,, (_Mdouble_ __x));
+__MATHCALL_FINITE (asin,, (_Mdouble_ __x));
 /* Arc tangent of X.  */
 __MATHCALL (atan,, (_Mdouble_ __x));
 /* Arc tangent of Y/X.  */
-__MATHCALL (atan2,, (_Mdouble_ __y, _Mdouble_ __x));
+__MATHCALL_FINITE (atan2,, (_Mdouble_ __y, _Mdouble_ __x));
 
 /* Cosine of X.  */
 __MATHCALL_VEC (cos,, (_Mdouble_ __x));
@@ -68,9 +68,9 @@ __MATHCALL (tan,, (_Mdouble_ __x));
 /* Hyperbolic functions.  */
 
 /* Hyperbolic cosine of X.  */
-__MATHCALL (cosh,, (_Mdouble_ __x));
+__MATHCALL_FINITE (cosh,, (_Mdouble_ __x));
 /* Hyperbolic sine of X.  */
-__MATHCALL (sinh,, (_Mdouble_ __x));
+__MATHCALL_FINITE (sinh,, (_Mdouble_ __x));
 /* Hyperbolic tangent of X.  */
 __MATHCALL (tanh,, (_Mdouble_ __x));
 
@@ -82,17 +82,17 @@ __MATHDECL_VEC (void,sincos,,
 
 #if defined __USE_XOPEN_EXTENDED || defined __USE_ISOC99
 /* Hyperbolic arc cosine of X.  */
-__MATHCALL (acosh,, (_Mdouble_ __x));
+__MATHCALL_FINITE (acosh,, (_Mdouble_ __x));
 /* Hyperbolic arc sine of X.  */
 __MATHCALL (asinh,, (_Mdouble_ __x));
 /* Hyperbolic arc tangent of X.  */
-__MATHCALL (atanh,, (_Mdouble_ __x));
+__MATHCALL_FINITE (atanh,, (_Mdouble_ __x));
 #endif
 
 /* Exponential and logarithmic functions.  */
 
 /* Exponential function of X.  */
-__MATHCALL_VEC (exp,, (_Mdouble_ __x));
+__MATHCALL_VEC_FINITE (exp,, (_Mdouble_ __x));
 
 /* Break VALUE into a normalized fraction and an integral power of 2.  */
 __MATHCALL (frexp,, (_Mdouble_ __x, int *__exponent));
@@ -101,17 +101,17 @@ __MATHCALL (frexp,, (_Mdouble_ __x, int *__exponent));
 __MATHCALL (ldexp,, (_Mdouble_ __x, int __exponent));
 
 /* Natural logarithm of X.  */
-__MATHCALL_VEC (log,, (_Mdouble_ __x));
+__MATHCALL_VEC_FINITE (log,, (_Mdouble_ __x));
 
 /* Base-ten logarithm of X.  */
-__MATHCALL (log10,, (_Mdouble_ __x));
+__MATHCALL_FINITE (log10,, (_Mdouble_ __x));
 
 /* Break VALUE into integral and fractional parts.  */
 __MATHCALL (modf,, (_Mdouble_ __x, _Mdouble_ *__iptr)) __nonnull ((2));
 
 #if __GLIBC_USE (IEC_60559_FUNCS_EXT)
 /* Compute exponent to base ten.  */
-__MATHCALL (exp10,, (_Mdouble_ __x));
+__MATHCALL_FINITE (exp10,, (_Mdouble_ __x));
 #endif
 
 #if defined __USE_XOPEN_EXTENDED || defined __USE_ISOC99
@@ -127,24 +127,23 @@ __MATHCALL (logb,, (_Mdouble_ __x));
 
 #ifdef __USE_ISOC99
 /* Compute base-2 exponential of X.  */
-__MATHCALL (exp2,, (_Mdouble_ __x));
+__MATHCALL_FINITE (exp2,, (_Mdouble_ __x));
 
 /* Compute base-2 logarithm of X.  */
-__MATHCALL (log2,, (_Mdouble_ __x));
+__MATHCALL_FINITE (log2,, (_Mdouble_ __x));
 #endif
-
 
 /* Power functions.  */
 
 /* Return X to the Y power.  */
-__MATHCALL_VEC (pow,, (_Mdouble_ __x, _Mdouble_ __y));
+__MATHCALL_VEC_FINITE (pow,, (_Mdouble_ __x, _Mdouble_ __y));
 
 /* Return the square root of X.  */
-__MATHCALL (sqrt,, (_Mdouble_ __x));
+__MATHCALL_FINITE (sqrt,, (_Mdouble_ __x));
 
 #if defined __USE_XOPEN || defined __USE_ISOC99
 /* Return `sqrt(X*X + Y*Y)'.  */
-__MATHCALL (hypot,, (_Mdouble_ __x, _Mdouble_ __y));
+__MATHCALL_FINITE (hypot,, (_Mdouble_ __x, _Mdouble_ __y));
 #endif
 
 #if defined __USE_XOPEN_EXTENDED || defined __USE_ISOC99
@@ -165,7 +164,7 @@ __MATHCALLX (fabs,, (_Mdouble_ __x), (__const__));
 __MATHCALLX (floor,, (_Mdouble_ __x), (__const__));
 
 /* Floating-point modulo remainder of X/Y.  */
-__MATHCALL (fmod,, (_Mdouble_ __x, _Mdouble_ __y));
+__MATHCALL_FINITE (fmod,, (_Mdouble_ __x, _Mdouble_ __y));
 
 #ifdef __USE_MISC
 # if ((!defined __cplusplus \
@@ -214,12 +213,12 @@ __MATHDECL_1 (int,isnan,, (_Mdouble_ __value)) __attribute__ ((__const__));
 
 #if defined __USE_MISC || (defined __USE_XOPEN && __MATH_DECLARING_DOUBLE)
 /* Bessel functions.  */
-__MATHCALL (j0,, (_Mdouble_));
-__MATHCALL (j1,, (_Mdouble_));
-__MATHCALL (jn,, (int, _Mdouble_));
-__MATHCALL (y0,, (_Mdouble_));
-__MATHCALL (y1,, (_Mdouble_));
-__MATHCALL (yn,, (int, _Mdouble_));
+__MATHCALL_FINITE (j0,, (_Mdouble_));
+__MATHCALL_FINITE (j1,, (_Mdouble_));
+__MATHCALL_FINITE (jn,, (int, _Mdouble_));
+__MATHCALL_FINITE (y0,, (_Mdouble_));
+__MATHCALL_FINITE (y1,, (_Mdouble_));
+__MATHCALL_FINITE (yn,, (int, _Mdouble_));
 #endif
 
 
@@ -246,7 +245,7 @@ __MATHCALL (gamma,, (_Mdouble_));
 /* Reentrant version of lgamma.  This function uses the global variable
    `signgam'.  The reentrant version instead takes a pointer and stores
    the value through it.  */
-__MATHCALL (lgamma,_r, (_Mdouble_, int *__signgamp));
+__MATHCALL_FINITE (lgamma,_r, (_Mdouble_, int *__signgamp));
 #endif
 
 
@@ -269,7 +268,7 @@ __MATHCALL (nextup,, (_Mdouble_ __x));
 # endif
 
 /* Return the remainder of integer divison X / Y with infinite precision.  */
-__MATHCALL (remainder,, (_Mdouble_ __x, _Mdouble_ __y));
+__MATHCALL_FINITE (remainder,, (_Mdouble_ __x, _Mdouble_ __y));
 
 # ifdef __USE_ISOC99
 /* Return X times (2 to the Nth power).  */
@@ -393,5 +392,5 @@ __MATHDECL_1 (int, setpayloadsig,, (_Mdouble_ *__x, _Mdouble_ __payload));
 			    && !defined __USE_XOPEN2K8))  \
      && !__MATH_DECLARING_FLOATN
 /* Return X times (2 to the Nth power).  */
-__MATHCALL (scalb,, (_Mdouble_ __x, _Mdouble_ __n));
+__MATHCALL_FINITE (scalb,, (_Mdouble_ __x, _Mdouble_ __n));
 #endif

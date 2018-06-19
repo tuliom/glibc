@@ -42,6 +42,9 @@ __BEGIN_DECLS
 /* Gather machine dependent type support.  */
 #include <bits/floatn.h>
 
+/* Get machine-dependent math features.  */
+#include <bits/math-features.h>
+
 /* Value returned on overflow.  With IEEE 754 floating point, this is
    +Infinity, otherwise the largest representable positive value.  */
 #if __GNUC_PREREQ (3, 3)
@@ -286,6 +289,28 @@ enum
 
 #define __MATHREDIR(type, function, suffix, args, to) \
   extern type __REDIRECT_NTH (__MATH_PRECNAME (function, suffix), args, to)
+#define __MATH_FINITE_NAMEY(p, f, s) \
+  p ## f ## s
+#define __MATH_FINITE_NAMEX(p, f, s) \
+  __MATH_FINITE_NAMEY (p, f, s)
+#define __MATH_FINITE_NAME_IMPL(function, suffix) \
+  __MATH_FINITE_NAMEX (__, __MATH_PRECNAME (function, suffix), _finite)
+#define __MATH_FINITE_NAME(function, suffix) \
+  __MATH_FINITE_NAME_IMPL (function, suffix)
+
+#if __HAVE_FINITE
+# define __MATHCALL_VEC_FINITE(function, suffix, args) \
+  __SIMD_DECL (__MATH_PRECNAME (function, suffix)) \
+  __MATHCALL_FINITE (function, suffix, args)
+# define __MATHCALL_FINITE(function, suffix, args) \
+  __MATHREDIR (_Mdouble_, function, suffix, args, \
+	       __MATH_FINITE_NAME(function, suffix))
+#else
+# define __MATHCALL_VEC_FINITE(function, suffix, args) \
+  __MATHCALL_VEC(function, suffix, args)
+# define __MATHCALL_FINITE(function, suffix, args) \
+  __MATHCALL (function, suffix, args)
+#endif
 
 #define _Mdouble_		double
 #define __MATH_PRECNAME(name,r)	__CONCAT(name,r)
@@ -319,6 +344,10 @@ enum
      || defined __LDBL_COMPAT \
      || defined _LIBC_TEST
 #  ifdef __LDBL_COMPAT
+
+#   undef __MATH_FINITE_NAME
+#   define __MATH_FINITE_NAME(function, suffix) \
+  __MATH_FINITE_NAMEX (__, function ## suffix, _finite)
 
 #   ifdef __USE_ISOC99
 extern float __nldbl_nexttowardf (float __x, long double __y)
@@ -364,8 +393,99 @@ extern long double __REDIRECT_NTH (nexttowardl,
 
 #endif	/* Use ISO C99.  */
 
+#if defined __USE_MISC || defined __USE_XOPEN
+/* This variable is used by `gamma' and `lgamma'.  */
+extern int signgam;
+#endif
+
+/* Define special entry points to use when the compiler got told to
+   only expect finite results.  */
+#if __HAVE_FINITE
+
+/* Include bits/math-finite.h for double.  */
+# define _Mdouble_ double
+# define __MATH_DECLARING_DOUBLE 1
+# define __MATH_DECLARING_FLOATN 0
+# define __REDIRFROM_X(function, reentrant) \
+  function ## reentrant
+# define __REDIRTO_X(function, reentrant) \
+   __ ## function ## reentrant ## _finite
+# define __REDIRTO_PUBLIC_X(function, reentrant) \
+  __REDIRTO_X(function, reentrant)
+# include <bits/math-finite.h>
+# undef _Mdouble_
+# undef __MATH_DECLARING_DOUBLE
+# undef __MATH_DECLARING_FLOATN
+# undef __REDIRFROM_X
+# undef __REDIRTO_X
+# undef __REDIRTO_PUBLIC_X
+
+/* When __USE_ISOC99 is defined, include math-finite for float and
+   long double, as well.  */
+# ifdef __USE_ISOC99
+
+/* Include bits/math-finite.h for float.  */
+#  define _Mdouble_ float
+#  define __MATH_DECLARING_DOUBLE 0
+#  define __MATH_DECLARING_FLOATN 0
+#  define __REDIRFROM_X(function, reentrant) \
+  function ## f ## reentrant
+#  define __REDIRTO_X(function, reentrant) \
+   __ ## function ## f ## reentrant ## _finite
+# define __REDIRTO_PUBLIC_X(function, reentrant) \
+  __REDIRTO_X(function, reentrant)
+#  include <bits/math-finite.h>
+#  undef _Mdouble_
+#  undef __MATH_DECLARING_DOUBLE
+#  undef __MATH_DECLARING_FLOATN
+#  undef __REDIRFROM_X
+#  undef __REDIRTO_X
+#  undef __REDIRTO_PUBLIC_X
+
+/* Include bits/math-finite.h for long double.  */
+#  ifdef __MATH_DECLARE_LDOUBLE
+#   define _Mdouble_ long double
+#   define __MATH_DECLARING_DOUBLE 0
+#   define __MATH_DECLARING_FLOATN 0
+#   define __REDIRFROM_X(function, reentrant) \
+  function ## l ## reentrant
+#   ifdef __NO_LONG_DOUBLE_MATH
+#    define __REDIRTO_X(function, reentrant) \
+   __ ## function ## reentrant ## _finite
+#    define __REDIRTO_PUBLIC_X(function, reentrant) \
+   __REDIRTO_X(function, reentrant)
+#   elif __HAVE_DISTINCT_FLOAT128 && !__HAVE_FLOAT128_UNLIKE_LDBL
+#    define __REDIRTO_X(function, reentrant)	\
+   __ ## function ## f128 ## reentrant ## _finite
+#    define __REDIRTO_PUBLIC_X(function, reentrant) \
+   __ ## function ## l ## reentrant ## _finite
+#   else
+#    define __REDIRTO_X(function, reentrant) \
+   __ ## function ## l ## reentrant ## _finite
+#    define __REDIRTO_PUBLIC_X(function, reentrant) \
+   __REDIRTO_X(function, reentrant)
+#   endif
+#   include <bits/math-finite.h>
+#   undef _Mdouble_
+#   undef __MATH_DECLARING_DOUBLE
+#   undef __MATH_DECLARING_FLOATN
+#   undef __REDIRFROM_X
+#   undef __REDIRTO_X
+#   undef __REDIRTO_PUBLIC_X
+#  endif
+
+# endif /* __USE_ISOC99.  */
+#endif /* __HAVE_FINITE  */
+
 /* Include the file of declarations for _FloatN and _FloatNx
    types.  */
+#undef __MATH_FINITE_NAME
+#define __MATH_FINITE_NAME(function, suffix) \
+  __MATH_FINITE_NAMEX (, __REDIRTO_X (function, suffix),)
+#define __REDIRFROM_X(function, reentrant) \
+  __MATH_PRECNAME (function, reentrant)
+#define __REDIRTO_PUBLIC_X(function, reentrant) \
+  __REDIRTO_X(function, reentrant)
 
 #if __HAVE_DISTINCT_FLOAT16 || (__HAVE_FLOAT16 && !defined _LIBC)
 # define _Mdouble_		_Float16
@@ -376,12 +496,27 @@ extern long double __REDIRECT_NTH (nexttowardl,
 #  include <bits/mathcalls-helper-functions.h>
 # endif
 # if __GLIBC_USE (IEC_60559_TYPES_EXT)
+#  if __HAVE_FINITE
+#   if __HAVE_DISTINCT_FLOAT16
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## f16 ## reentrant ## _finite
+#   else
+#    error "non-distinct _Float16"
+#   endif
+#  else
+#   define __REDIRTO_X(function, reentrant) \
+  __MATH_PRECNAME (function, reentrant)
+#  endif
 #  include <bits/mathcalls.h>
+#  if __HAVE_FINITE
+#   include <bits/math-finite.h>
+#  endif
 # endif
 # undef _Mdouble_
 # undef __MATH_PRECNAME
 # undef __MATH_DECLARING_DOUBLE
 # undef __MATH_DECLARING_FLOATN
+# undef __REDIRTO_X
 #endif /* __HAVE_DISTINCT_FLOAT16 || (__HAVE_FLOAT16 && !_LIBC).  */
 
 #if __HAVE_DISTINCT_FLOAT32 || (__HAVE_FLOAT32 && !defined _LIBC)
@@ -393,12 +528,28 @@ extern long double __REDIRECT_NTH (nexttowardl,
 #  include <bits/mathcalls-helper-functions.h>
 # endif
 # if __GLIBC_USE (IEC_60559_TYPES_EXT)
+#  if __HAVE_FINITE
+#   if __HAVE_DISTINCT_FLOAT32
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## f32 ## reentrant ## _finite
+#   else
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## f ## reentrant ## _finite
+#   endif
+#  else
+#   define __REDIRTO_X(function, reentrant) \
+  __MATH_PRECNAME (function, reentrant)
+#  endif
 #  include <bits/mathcalls.h>
+#  if __HAVE_FINITE
+#   include <bits/math-finite.h>
+#  endif
 # endif
 # undef _Mdouble_
 # undef __MATH_PRECNAME
 # undef __MATH_DECLARING_DOUBLE
 # undef __MATH_DECLARING_FLOATN
+# undef __REDIRTO_X
 #endif /* __HAVE_DISTINCT_FLOAT32 || (__HAVE_FLOAT32 && !_LIBC).  */
 
 #if __HAVE_DISTINCT_FLOAT64 || (__HAVE_FLOAT64 && !defined _LIBC)
@@ -410,12 +561,28 @@ extern long double __REDIRECT_NTH (nexttowardl,
 #  include <bits/mathcalls-helper-functions.h>
 # endif
 # if __GLIBC_USE (IEC_60559_TYPES_EXT)
+#  if __HAVE_FINITE
+#   if __HAVE_DISTINCT_FLOAT64
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## f64 ## reentrant ## _finite
+#   else
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## reentrant ## _finite
+#   endif
+#  else
+#   define __REDIRTO_X(function, reentrant) \
+  __MATH_PRECNAME (function, reentrant)
+#  endif
 #  include <bits/mathcalls.h>
+#  if __HAVE_FINITE
+#   include <bits/math-finite.h>
+#  endif
 # endif
 # undef _Mdouble_
 # undef __MATH_PRECNAME
 # undef __MATH_DECLARING_DOUBLE
 # undef __MATH_DECLARING_FLOATN
+# undef __REDIRTO_X
 #endif /* __HAVE_DISTINCT_FLOAT64 || (__HAVE_FLOAT64 && !_LIBC).  */
 
 #if __HAVE_DISTINCT_FLOAT128 || (__HAVE_FLOAT128 && !defined _LIBC)
@@ -427,12 +594,28 @@ extern long double __REDIRECT_NTH (nexttowardl,
 #  include <bits/mathcalls-helper-functions.h>
 # endif
 # if __GLIBC_USE (IEC_60559_TYPES_EXT)
+#  if __HAVE_FINITE
+#   if __HAVE_DISTINCT_FLOAT128
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## f128 ## reentrant ## _finite
+#   else
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## l ## reentrant ## _finite
+#   endif
+#  else
+#   define __REDIRTO_X(function, reentrant) \
+  __MATH_PRECNAME (function, reentrant)
+#  endif
 #  include <bits/mathcalls.h>
+#  if __HAVE_FINITE
+#   include <bits/math-finite.h>
+#  endif
 # endif
 # undef _Mdouble_
 # undef __MATH_PRECNAME
 # undef __MATH_DECLARING_DOUBLE
 # undef __MATH_DECLARING_FLOATN
+# undef __REDIRTO_X
 #endif /* __HAVE_DISTINCT_FLOAT128 || (__HAVE_FLOAT128 && !_LIBC).  */
 
 #if __HAVE_DISTINCT_FLOAT32X || (__HAVE_FLOAT32X && !defined _LIBC)
@@ -444,12 +627,28 @@ extern long double __REDIRECT_NTH (nexttowardl,
 #  include <bits/mathcalls-helper-functions.h>
 # endif
 # if __GLIBC_USE (IEC_60559_TYPES_EXT)
+#  if __HAVE_FINITE
+#   if __HAVE_DISTINCT_FLOAT32X
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## f32x ## reentrant ## _finite
+#   else
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## reentrant ## _finite
+#   endif
+#  else
+#   define __REDIRTO_X(function, reentrant) \
+  __MATH_PRECNAME (function, reentrant)
+#  endif
 #  include <bits/mathcalls.h>
+#  if __HAVE_FINITE
+#   include <bits/math-finite.h>
+#  endif
 # endif
 # undef _Mdouble_
 # undef __MATH_PRECNAME
 # undef __MATH_DECLARING_DOUBLE
 # undef __MATH_DECLARING_FLOATN
+# undef __REDIRTO_X
 #endif /* __HAVE_DISTINCT_FLOAT32X || (__HAVE_FLOAT32X && !_LIBC).  */
 
 #if __HAVE_DISTINCT_FLOAT64X || (__HAVE_FLOAT64X && !defined _LIBC)
@@ -461,12 +660,31 @@ extern long double __REDIRECT_NTH (nexttowardl,
 #  include <bits/mathcalls-helper-functions.h>
 # endif
 # if __GLIBC_USE (IEC_60559_TYPES_EXT)
+#  if __HAVE_FINITE
+#   if __HAVE_DISTINCT_FLOAT64X
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## f64x ## reentrant ## _finite
+#   elif __HAVE_FLOAT64X_LONG_DOUBLE
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## l ## reentrant ## _finite
+#   else
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## f128 ## reentrant ## _finite
+#   endif
+#  else
+#   define __REDIRTO_X(function, reentrant) \
+  __MATH_PRECNAME (function, reentrant)
+#  endif
 #  include <bits/mathcalls.h>
+#  if __HAVE_FINITE
+#   include <bits/math-finite.h>
+#  endif
 # endif
 # undef _Mdouble_
 # undef __MATH_PRECNAME
 # undef __MATH_DECLARING_DOUBLE
 # undef __MATH_DECLARING_FLOATN
+# undef __REDIRTO_X
 #endif /* __HAVE_DISTINCT_FLOAT64X || (__HAVE_FLOAT64X && !_LIBC).  */
 
 #if __HAVE_DISTINCT_FLOAT128X || (__HAVE_FLOAT128X && !defined _LIBC)
@@ -478,18 +696,43 @@ extern long double __REDIRECT_NTH (nexttowardl,
 #  include <bits/mathcalls-helper-functions.h>
 # endif
 # if __GLIBC_USE (IEC_60559_TYPES_EXT)
+#  if __HAVE_FINITE
+#   if __HAVE_DISTINCT_FLOAT128X
+#    define __REDIRTO_X(function, reentrant) \
+  __ ## function ## f128x ## reentrant ## _finite
+#   else
+#    error "non-distinct _Float128x"
+#   endif
+#  else
+#   define __REDIRTO_X(function, reentrant) \
+  __MATH_PRECNAME (function, reentrant)
+#  endif
 #  include <bits/mathcalls.h>
+#  if __HAVE_FINITE
+#   include <bits/math-finite.h>
+#  endif
 # endif
 # undef _Mdouble_
 # undef __MATH_PRECNAME
 # undef __MATH_DECLARING_DOUBLE
 # undef __MATH_DECLARING_FLOATN
+# undef __REDIRTO_X
 #endif /* __HAVE_DISTINCT_FLOAT128X || (__HAVE_FLOAT128X && !_LIBC).  */
 
+#undef	__REDIRFROM_X
+#undef	__REDIRTO_PUBLIC_X
 #undef	__MATHDECL_1_IMPL
 #undef	__MATHDECL_1
 #undef	__MATHDECL
 #undef	__MATHCALL
+#undef	__MATHCALL_VEC
+#undef	__MATHCALL_FINITE
+#undef	__MATHCALL_VEC_FINITE
+#undef	__MATHREDIR
+#undef	__MATH_FINITE_NAMEY
+#undef	__MATH_FINITE_NAMEX
+#undef	__MATH_FINITE_NAME_IMPL
+#undef	__MATH_FINITE_NAME
 
 /* Declare functions returning a narrower type.  */
 #define __MATHCALL_NARROW_ARGS_1 (_Marg_ __x)
@@ -775,11 +1018,6 @@ extern long double __REDIRECT_NTH (nexttowardl,
 #undef __MATHCALL_NARROW_NORMAL
 #undef __MATHCALL_NARROW_REDIR
 #undef __MATHCALL_NARROW
-
-#if defined __USE_MISC || defined __USE_XOPEN
-/* This variable is used by `gamma' and `lgamma'.  */
-extern int signgam;
-#endif
 
 #if (__HAVE_DISTINCT_FLOAT16			\
      || __HAVE_DISTINCT_FLOAT32			\
@@ -1247,227 +1485,6 @@ iszero (__T __val)
 #ifdef __USE_EXTERN_INLINES
 # include <bits/mathinline.h>
 #endif
-
-/* Define special entry points to use when the compiler got told to
-   only expect finite results.  */
-#if defined __FINITE_MATH_ONLY__ && __FINITE_MATH_ONLY__ > 0
-
-/* Include bits/math-finite.h for double.  */
-# define _Mdouble_ double
-# define __MATH_DECLARING_DOUBLE 1
-# define __MATH_DECLARING_FLOATN 0
-# define __REDIRFROM_X(function, reentrant) \
-  function ## reentrant
-# define __REDIRTO_X(function, reentrant) \
-   __ ## function ## reentrant ## _finite
-# include <bits/math-finite.h>
-# undef _Mdouble_
-# undef __MATH_DECLARING_DOUBLE
-# undef __MATH_DECLARING_FLOATN
-# undef __REDIRFROM_X
-# undef __REDIRTO_X
-
-/* When __USE_ISOC99 is defined, include math-finite for float and
-   long double, as well.  */
-# ifdef __USE_ISOC99
-
-/* Include bits/math-finite.h for float.  */
-#  define _Mdouble_ float
-#  define __MATH_DECLARING_DOUBLE 0
-#  define __MATH_DECLARING_FLOATN 0
-#  define __REDIRFROM_X(function, reentrant) \
-  function ## f ## reentrant
-#  define __REDIRTO_X(function, reentrant) \
-   __ ## function ## f ## reentrant ## _finite
-#  include <bits/math-finite.h>
-#  undef _Mdouble_
-#  undef __MATH_DECLARING_DOUBLE
-#  undef __MATH_DECLARING_FLOATN
-#  undef __REDIRFROM_X
-#  undef __REDIRTO_X
-
-/* Include bits/math-finite.h for long double.  */
-#  ifdef __MATH_DECLARE_LDOUBLE
-#   define _Mdouble_ long double
-#   define __MATH_DECLARING_DOUBLE 0
-#   define __MATH_DECLARING_FLOATN 0
-#   define __REDIRFROM_X(function, reentrant) \
-  function ## l ## reentrant
-#   ifdef __NO_LONG_DOUBLE_MATH
-#    define __REDIRTO_X(function, reentrant) \
-   __ ## function ## reentrant ## _finite
-#   else
-#    define __REDIRTO_X(function, reentrant) \
-   __ ## function ## l ## reentrant ## _finite
-#   endif
-#   include <bits/math-finite.h>
-#   undef _Mdouble_
-#   undef __MATH_DECLARING_DOUBLE
-#   undef __MATH_DECLARING_FLOATN
-#   undef __REDIRFROM_X
-#   undef __REDIRTO_X
-#  endif
-
-# endif /* __USE_ISOC99.  */
-
-/* Include bits/math-finite.h for _FloatN and _FloatNx.  */
-
-# if (__HAVE_DISTINCT_FLOAT16 || (__HAVE_FLOAT16 && !defined _LIBC))	\
-      && __GLIBC_USE (IEC_60559_TYPES_EXT)
-#  define _Mdouble_ _Float16
-#  define __MATH_DECLARING_DOUBLE 0
-#  define __MATH_DECLARING_FLOATN 1
-#  define __REDIRFROM_X(function, reentrant) \
-  function ## f16 ## reentrant
-#  if __HAVE_DISTINCT_FLOAT16
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## f16 ## reentrant ## _finite
-#  else
-#   error "non-disinct _Float16"
-#  endif
-#  include <bits/math-finite.h>
-#  undef _Mdouble_
-#  undef __MATH_DECLARING_DOUBLE
-#  undef __MATH_DECLARING_FLOATN
-#  undef __REDIRFROM_X
-#  undef __REDIRTO_X
-# endif
-
-# if (__HAVE_DISTINCT_FLOAT32 || (__HAVE_FLOAT32 && !defined _LIBC))	\
-      && __GLIBC_USE (IEC_60559_TYPES_EXT)
-#  define _Mdouble_ _Float32
-#  define __MATH_DECLARING_DOUBLE 0
-#  define __MATH_DECLARING_FLOATN 1
-#  define __REDIRFROM_X(function, reentrant) \
-  function ## f32 ## reentrant
-#  if __HAVE_DISTINCT_FLOAT32
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## f32 ## reentrant ## _finite
-#  else
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## f ## reentrant ## _finite
-#  endif
-#  include <bits/math-finite.h>
-#  undef _Mdouble_
-#  undef __MATH_DECLARING_DOUBLE
-#  undef __MATH_DECLARING_FLOATN
-#  undef __REDIRFROM_X
-#  undef __REDIRTO_X
-# endif
-
-# if (__HAVE_DISTINCT_FLOAT64 || (__HAVE_FLOAT64 && !defined _LIBC))	\
-      && __GLIBC_USE (IEC_60559_TYPES_EXT)
-#  define _Mdouble_ _Float64
-#  define __MATH_DECLARING_DOUBLE 0
-#  define __MATH_DECLARING_FLOATN 1
-#  define __REDIRFROM_X(function, reentrant) \
-  function ## f64 ## reentrant
-#  if __HAVE_DISTINCT_FLOAT64
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## f64 ## reentrant ## _finite
-#  else
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## reentrant ## _finite
-#  endif
-#  include <bits/math-finite.h>
-#  undef _Mdouble_
-#  undef __MATH_DECLARING_DOUBLE
-#  undef __MATH_DECLARING_FLOATN
-#  undef __REDIRFROM_X
-#  undef __REDIRTO_X
-# endif
-
-# if (__HAVE_DISTINCT_FLOAT128 || (__HAVE_FLOAT128 && !defined _LIBC))	\
-      && __GLIBC_USE (IEC_60559_TYPES_EXT)
-#  define _Mdouble_ _Float128
-#  define __MATH_DECLARING_DOUBLE 0
-#  define __MATH_DECLARING_FLOATN 1
-#  define __REDIRFROM_X(function, reentrant) \
-  function ## f128 ## reentrant
-#  if __HAVE_DISTINCT_FLOAT128
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## f128 ## reentrant ## _finite
-#  else
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## l ## reentrant ## _finite
-#  endif
-#  include <bits/math-finite.h>
-#  undef _Mdouble_
-#  undef __MATH_DECLARING_DOUBLE
-#  undef __MATH_DECLARING_FLOATN
-#  undef __REDIRFROM_X
-#  undef __REDIRTO_X
-# endif
-
-# if (__HAVE_DISTINCT_FLOAT32X || (__HAVE_FLOAT32X && !defined _LIBC))	\
-      && __GLIBC_USE (IEC_60559_TYPES_EXT)
-#  define _Mdouble_ _Float32x
-#  define __MATH_DECLARING_DOUBLE 0
-#  define __MATH_DECLARING_FLOATN 1
-#  define __REDIRFROM_X(function, reentrant) \
-  function ## f32x ## reentrant
-#  if __HAVE_DISTINCT_FLOAT32X
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## f32x ## reentrant ## _finite
-#  else
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## reentrant ## _finite
-#  endif
-#  include <bits/math-finite.h>
-#  undef _Mdouble_
-#  undef __MATH_DECLARING_DOUBLE
-#  undef __MATH_DECLARING_FLOATN
-#  undef __REDIRFROM_X
-#  undef __REDIRTO_X
-# endif
-
-# if (__HAVE_DISTINCT_FLOAT64X || (__HAVE_FLOAT64X && !defined _LIBC))	\
-      && __GLIBC_USE (IEC_60559_TYPES_EXT)
-#  define _Mdouble_ _Float64x
-#  define __MATH_DECLARING_DOUBLE 0
-#  define __MATH_DECLARING_FLOATN 1
-#  define __REDIRFROM_X(function, reentrant) \
-  function ## f64x ## reentrant
-#  if __HAVE_DISTINCT_FLOAT64X
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## f64x ## reentrant ## _finite
-#  elif __HAVE_FLOAT64X_LONG_DOUBLE
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## l ## reentrant ## _finite
-#  else
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## f128 ## reentrant ## _finite
-#  endif
-#  include <bits/math-finite.h>
-#  undef _Mdouble_
-#  undef __MATH_DECLARING_DOUBLE
-#  undef __MATH_DECLARING_FLOATN
-#  undef __REDIRFROM_X
-#  undef __REDIRTO_X
-# endif
-
-# if (__HAVE_DISTINCT_FLOAT128X || (__HAVE_FLOAT128X && !defined _LIBC)) \
-      && __GLIBC_USE (IEC_60559_TYPES_EXT)
-#  define _Mdouble_ _Float128x
-#  define __MATH_DECLARING_DOUBLE 0
-#  define __MATH_DECLARING_FLOATN 1
-#  define __REDIRFROM_X(function, reentrant) \
-  function ## f128x ## reentrant
-#  if __HAVE_DISTINCT_FLOAT128X
-#   define __REDIRTO_X(function, reentrant) \
-   __ ## function ## f128x ## reentrant ## _finite
-#  else
-#   error "non-disinct _Float128x"
-#  endif
-#  include <bits/math-finite.h>
-#  undef _Mdouble_
-#  undef __MATH_DECLARING_DOUBLE
-#  undef __MATH_DECLARING_FLOATN
-#  undef __REDIRFROM_X
-#  undef __REDIRTO_X
-# endif
-
-#endif /* __FINITE_MATH_ONLY__ > 0.  */
 
 #if __GLIBC_USE (IEC_60559_BFP_EXT)
 /* An expression whose type has the widest of the evaluation formats
