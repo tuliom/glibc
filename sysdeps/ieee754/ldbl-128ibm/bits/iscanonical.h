@@ -50,7 +50,11 @@ extern "C++" {
 inline int iscanonical (float __val) { return __iscanonicalf (__val); }
 inline int iscanonical (double __val) { return __iscanonical (__val); }
 inline int iscanonical (long double __val) { return __iscanonicall (__val); }
-#  if __HAVE_DISTINCT_FLOAT128
+/* When using an IEEE 128-bit long double, _Float128 is defined as long double
+   in C++.  */
+#  if __HAVE_DISTINCT_FLOAT128 \
+      && (!defined __cplusplus \
+	  || defined __cplusplus && __HAVE_FLOAT128_UNLIKE_LDBL)
 inline int iscanonical (_Float128 __val) { return __iscanonicalf128 (__val); }
 #  endif
 }

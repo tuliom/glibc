@@ -18,7 +18,9 @@ hidden_proto (__finitef)
 hidden_proto (__isinff)
 hidden_proto (__isnanf)
 
-#  ifndef __NO_LONG_DOUBLE_MATH
+#  if !defined __NO_LONG_DOUBLE_MATH \
+      && (!__HAVE_DISTINCT_FLOAT128 \
+	  || (__HAVE_DISTINCT_FLOAT128 && __HAVE_FLOAT128_UNLIKE_LDBL))
 hidden_proto (__finitel)
 hidden_proto (__isinfl)
 hidden_proto (__isnanl)
@@ -40,7 +42,9 @@ libm_hidden_proto (__exp)
 libm_hidden_proto (__expf)
 libm_hidden_proto (__roundeven)
 
-# ifndef __NO_LONG_DOUBLE_MATH
+#  if !defined __NO_LONG_DOUBLE_MATH \
+  && (!__HAVE_DISTINCT_FLOAT128 \
+      || (__HAVE_DISTINCT_FLOAT128 && __HAVE_FLOAT128_UNLIKE_LDBL))
 libm_hidden_proto (__fpclassifyl)
 libm_hidden_proto (__issignalingl)
 libm_hidden_proto (__expl)
@@ -61,7 +65,11 @@ libm_hidden_proto (__expm1f128)
 float (sqrtf) (float) asm ("__ieee754_sqrtf");
 double (sqrt) (double) asm ("__ieee754_sqrt");
 #   ifndef __NO_LONG_DOUBLE_MATH
+/* Do not redirect sqrtl twice when the long double already redirects it.  */
+#    if !__HAVE_DISTINCT_FLOAT128 \
+	|| (__HAVE_DISTINCT_FLOAT128 && __HAVE_FLOAT128_UNLIKE_LDBL)
 long double (sqrtl) (long double) asm ("__ieee754_sqrtl");
+#    endif
 #   endif
 #   if __HAVE_DISTINCT_FLOAT128 > 0
 _Float128 (sqrtf128) (_Float128) asm ("__ieee754_sqrtf128");

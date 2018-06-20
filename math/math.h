@@ -286,6 +286,10 @@ enum
   extern type __MATH_PRECNAME(function,suffix) args __THROW
 #define __MATHDECL_1(type, function, suffix, args) \
   __MATHDECL_1_IMPL(type, function, suffix, args)
+/* Ignore the alias by default.  The alias is only useful with
+   redirections.  */
+#define __MATHDECL_ALIAS(type, function, suffix, args, alias) \
+  __MATHDECL_1(type, function, suffix, args)
 
 #define __MATHREDIR(type, function, suffix, args, to) \
   extern type __REDIRECT_NTH (__MATH_PRECNAME (function, suffix), args, to)
@@ -367,6 +371,39 @@ extern long double __REDIRECT_NTH (nexttowardl,
 #   undef __MATHDECL_1
 #   define __MATHDECL_1(type, function,suffix, args) \
   __MATHREDIR(type, function, suffix, args, __CONCAT(function,suffix))
+
+#  elif __HAVE_DISTINCT_FLOAT128 && !__HAVE_FLOAT128_UNLIKE_LDBL
+#   ifdef __REDIRECT_NTH
+#    ifdef __USE_ISOC99
+extern float __REDIRECT_NTH (nexttowardf, (float __x, long double __y),
+			    __nexttowardf_to_ieee128)
+  __attribute__ ((__const__));
+extern double __REDIRECT_NTH (nexttoward, (double __x, long double __y),
+			     __nexttoward_to_ieee128)
+  __attribute__ ((__const__));
+
+#define __dremieee128 __remainderieee128
+#define __gammaieee128 __lgammaieee128
+
+#    endif
+#   endif
+
+#   undef __MATHDECL_1
+#   undef __MATHDECL_ALIAS
+
+#   define __REDIRTO(function, suffix) \
+  __ ## function ## ieee128 ## suffix
+#   define __REDIRTO_ALT(function, suffix) \
+  __ ## function ## f128 ## suffix
+
+#   undef __MATH_FINITE_NAME
+#   define __MATH_FINITE_NAME(function, suffix) \
+  __MATH_FINITE_NAMEX (, __REDIRTO_ALT (function, suffix), _finite)
+
+#   define __MATHDECL_1(type, function, suffix, args) \
+  __MATHREDIR (type, function, suffix, args, __REDIRTO (function, suffix))
+#   define __MATHDECL_ALIAS(type, function, suffix, args, alias) \
+  __MATHREDIR (type, function, suffix, args, __REDIRTO_ALT (alias, suffix))
 #  endif
 
 /* Include the file of declarations again, this time using `long double'
@@ -379,15 +416,25 @@ extern long double __REDIRECT_NTH (nexttowardl,
 #  define __MATH_DECLARE_LDOUBLE   1
 #  include <bits/mathcalls-helper-functions.h>
 #  include <bits/mathcalls.h>
+
 #  undef _Mdouble_
 #  undef __MATH_PRECNAME
 #  undef __MATH_DECLARING_DOUBLE
 #  undef __MATH_DECLARING_FLOATN
 
-#  if defined __LDBL_COMPAT
+#  if defined __LDBL_COMPAT \
+      || (__HAVE_DISTINCT_FLOAT128 && !__HAVE_FLOAT128_UNLIKE_LDBL)
+#   undef __REDIRTO
+#   undef __REDIRTO_ALT
 #   undef __MATHDECL_1
+#   undef __MATHDECL_ALIAS
+#   undef __MATH_FINITE_NAME
+#   define __MATH_FINITE_NAME(function, suffix) \
+  __MATH_FINITE_NAME_IMPL (function, suffix)
 #   define __MATHDECL_1(type, function, suffix, args) \
   __MATHDECL_1_IMPL(type, function, suffix, args)
+#   define __MATHDECL_ALIAS(type, function, suffix, args, alias) \
+  __MATHDECL_1(type, function, suffix, args)
 #  endif
 # endif /* !(__NO_LONG_DOUBLE_MATH && _LIBC) || __LDBL_COMPAT */
 
@@ -723,6 +770,7 @@ extern int signgam;
 #undef	__REDIRTO_PUBLIC_X
 #undef	__MATHDECL_1_IMPL
 #undef	__MATHDECL_1
+#undef	__MATHDECL_ALIAS
 #undef	__MATHDECL
 #undef	__MATHCALL
 #undef	__MATHCALL_VEC
@@ -764,12 +812,18 @@ extern int signgam;
 #  undef __MATHCALL_NARROW
 #  define __MATHCALL_NARROW(func, redir, nargs) \
   __MATHCALL_NARROW_REDIR (func, redir, nargs)
+# elif __HAVE_DISTINCT_FLOAT128 && !__HAVE_FLOAT128_UNLIKE_LDBL
+#  define __MATHCALL_REDIR_NAME(name) __ ## f32 ## name ## ieee128
+#  undef __MATHCALL_NARROW
+#  define __MATHCALL_NARROW(func, redir, nargs) \
+  __MATHCALL_NARROW_REDIR (func, redir, nargs)
 # endif
 # include <bits/mathcalls-narrow.h>
 # undef _Mret_
 # undef _Marg_
 # undef __MATHCALL_NAME
-# ifdef __LDBL_COMPAT
+# if defined __LDBL_COMPAT \
+     || (__HAVE_DISTINCT_FLOAT128 && !__HAVE_FLOAT128_UNLIKE_LDBL)
 #  undef __MATHCALL_REDIR_NAME
 #  undef __MATHCALL_NARROW
 #  define __MATHCALL_NARROW(func, redir, nargs) \
@@ -784,12 +838,18 @@ extern int signgam;
 #  undef __MATHCALL_NARROW
 #  define __MATHCALL_NARROW(func, redir, nargs) \
   __MATHCALL_NARROW_REDIR (func, redir, nargs)
+# elif __HAVE_DISTINCT_FLOAT128 && !__HAVE_FLOAT128_UNLIKE_LDBL
+#  define __MATHCALL_REDIR_NAME(name) __ ## f64 ## name ## ieee128
+#  undef __MATHCALL_NARROW
+#  define __MATHCALL_NARROW(func, redir, nargs) \
+  __MATHCALL_NARROW_REDIR (func, redir, nargs)
 # endif
 # include <bits/mathcalls-narrow.h>
 # undef _Mret_
 # undef _Marg_
 # undef __MATHCALL_NAME
-# ifdef __LDBL_COMPAT
+# if defined __LDBL_COMPAT \
+     || (__HAVE_DISTINCT_FLOAT128 && !__HAVE_FLOAT128_UNLIKE_LDBL)
 #  undef __MATHCALL_REDIR_NAME
 #  undef __MATHCALL_NARROW
 #  define __MATHCALL_NARROW(func, redir, nargs) \
