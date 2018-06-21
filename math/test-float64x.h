@@ -28,7 +28,7 @@
 #define CFLOAT __CFLOAT64X
 #define BUILD_COMPLEX(real, imag) (CMPLXF64X ((real), (imag)))
 #define PREFIX FLT64X
-#if FLT64X_MANT_DIG == LDBL_MANT_DIG
+#if !__HAVE_DISTINCT_FLOAT128 && FLT64X_MANT_DIG == LDBL_MANT_DIG
 # define TYPE_STR "ldouble"
 # define ULP_IDX ULP_LDBL
 # define ULP_I_IDX ULP_I_LDBL

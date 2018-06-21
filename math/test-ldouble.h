@@ -27,6 +27,10 @@
 # define TYPE_STR "double"
 # define ULP_IDX ULP_DBL
 # define ULP_I_IDX ULP_I_DBL
+#elif __HAVE_DISTINCT_FLOAT128 && !__HAVE_FLOAT128_UNLIKE_LDBL
+# define TYPE_STR "float128"
+# define ULP_IDX ULP_FLT128
+# define ULP_I_IDX ULP_I_FLT128
 #else
 # define TYPE_STR "ldouble"
 # define ULP_IDX ULP_LDBL
