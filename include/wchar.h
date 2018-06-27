@@ -114,7 +114,10 @@ libc_hidden_proto (fputws_unlocked)
 libc_hidden_proto (putwc_unlocked)
 libc_hidden_proto (putwc)
 
+#if !__HAVE_DISTINCT_FLOAT128					\
+  || (__HAVE_DISTINCT_FLOAT128 && __LDBL_MANT_DIG__ != 113)
 libc_hidden_proto (vswscanf)
+#endif
 
 libc_hidden_proto (mbrtowc)
 libc_hidden_proto (wcrtomb)

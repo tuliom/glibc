@@ -1,65 +1,57 @@
+ifeq ($(subdir),libio)
+ldbl-extra-routines += wscanf \
+		       fwscanf \
+		       vwscanf \
+		       swscanf
+endif
+
 ifeq ($(subdir),stdio-common)
 # Wrappers for *printf functions that take long double arguments with
 # IEEE binary128 format
-routines += ieee128-asprintf
-routines += ieee128-dprintf
-routines += ieee128-fprintf
-routines += ieee128-printf
-routines += ieee128-snprintf
-routines += ieee128-sprintf
-
-routines += ieee128-vasprintf
-routines += ieee128-vdprintf
-routines += ieee128-vfprintf
-routines += ieee128-vprintf
-routines += ieee128-vsnprintf
-routines += ieee128-vsprintf
-
-routines += ieee128-fwprintf
-routines += ieee128-swprintf
-routines += ieee128-wprintf
-
-routines += ieee128-vfwprintf
-routines += ieee128-vswprintf
-routines += ieee128-vwprintf
-
-routines += ieee128-asprintf_chk
-routines += ieee128-dprintf_chk
-routines += ieee128-fprintf_chk
-routines += ieee128-printf_chk
-routines += ieee128-snprintf_chk
-routines += ieee128-sprintf_chk
-
-routines += ieee128-vasprintf_chk
-routines += ieee128-vdprintf_chk
-routines += ieee128-vfprintf_chk
-routines += ieee128-vprintf_chk
-routines += ieee128-vsnprintf_chk
-routines += ieee128-vsprintf_chk
-
-routines += ieee128-fwprintf_chk
-routines += ieee128-swprintf_chk
-routines += ieee128-wprintf_chk
-
-routines += ieee128-vfwprintf_chk
-routines += ieee128-vswprintf_chk
-routines += ieee128-vwprintf_chk
-
-routines += ieee128-fscanf
-routines += ieee128-scanf
-routines += ieee128-sscanf
-
-routines += ieee128-vfscanf
-routines += ieee128-vscanf
-routines += ieee128-vsscanf
-
-routines += ieee128-fwscanf
-routines += ieee128-swscanf
-routines += ieee128-wscanf
-
-routines += ieee128-vfwscanf
-routines += ieee128-vswscanf
-routines += ieee128-vwscanf
+ldbl-extra-routines += asprintf \
+		       dprintf \
+		       fprintf \
+		       printf \
+		       snprintf \
+		       sprintf \
+		       vasprintf \
+		       vdprintf \
+		       vfprintf \
+		       vprintf \
+		       vsnprintf \
+		       vsprintf \
+		       fwprintf \
+		       swprintf \
+		       wprintf \
+		       vfwprintf \
+		       vswprintf \
+		       vwprintf \
+		       asprintf_chk \
+		       dprintf_chk \
+		       fprintf_chk \
+		       printf_chk \
+		       snprintf_chk \
+		       sprintf_chk \
+		       vasprintf_chk \
+		       vdprintf_chk \
+		       vfprintf_chk \
+		       vprintf_chk \
+		       vsnprintf_chk \
+		       vsprintf_chk \
+		       fwprintf_chk \
+		       swprintf_chk \
+		       wprintf_chk \
+		       vfwprintf_chk \
+		       vswprintf_chk \
+		       vwprintf_chk \
+		       fscanf \
+		       scanf \
+		       sscanf \
+		       vfscanf \
+		       vscanf \
+		       vsscanf \
+		       vfwscanf \
+		       vswscanf
 
 # Printing long double values with IEEE binary128 format reuses part
 # of the internal float128 implementation (__printf_fp, __printf_fphex,
@@ -243,8 +235,8 @@ endif
 ifeq ($(subdir),misc)
 # Wrappers for err.h functions that take long double arguments with
 # IEEE binary128 format
-routines += ieee128-err
-routines += ieee128-error
+ldbl-extra-routines += err \
+		       error
 
 tests-internal += test-warn-ibm128 test-warn-ieee128
 CFLAGS-test-warn-ieee128.c += -mfloat128 -mabi=ieeelongdouble -Wno-psabi
@@ -331,3 +323,21 @@ $(objpfx)test-error2-%.out: \
 	$(SHELL) $^ '$(test-program-prefix)' $@; \
 	$(evaluate-test)
 endif
+
+routines += $(foreach r,$(ldbl-extra-routines),ieee128-$(r))
+
+ldbl-ibm128-files := $(objpfx)test-printf-ibm128^ \
+		     $(objpfx)test-wprintf-ibm128^ \
+		     $(objpfx)test-printf-chk-ibm128^ \
+		     $(objpfx)test-wprintf-chk-ibm128^ \
+		     $(objpfx)test-scanf-ibm128^ \
+		     $(objpfx)test-wscanf-ibm128^ \
+		     $(foreach r,$(ldbl-extra-routines),$(objpfx)$(r)^) \
+		     $(foreach r,$(ldbl-extra-routines),$(objpfx)$(r)-internal^)
+obj-suf-foreach = $(foreach suf,$(all-object-suffixes),$(subst ^,$(suf),$(1)))
+
+# Removes -mabi=ieeelongdouble from ldbl-ibm128 files.  This is not required,
+# but helps when analyzing the flags that were passed to the compiler.
+$(call obj-suf-foreach,$(ldbl-ibm128-files)): \
+  sysdep-CFLAGS := $(filter-out -mabi=ieeelongdouble -Wno-psabi, \
+				$(sysdep-CFLAGS)) -mabi=ibmlongdouble

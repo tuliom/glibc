@@ -155,14 +155,18 @@ extern int _IO_new_fgetpos (FILE *, __fpos_t *);
 #   define fgetpos(fp, posp) _IO_new_fgetpos (fp, posp)
 #  endif
 
+#if !__HAVE_DISTINCT_FLOAT128 \
+  || (__HAVE_DISTINCT_FLOAT128 && __LDBL_MANT_DIG__ != 113)
 libc_hidden_proto (dprintf)
-extern __typeof (dprintf) __dprintf
-     __attribute__ ((__format__ (__printf__, 2, 3)));
-libc_hidden_proto (__dprintf)
 libc_hidden_proto (fprintf)
 libc_hidden_proto (vfprintf)
 libc_hidden_proto (sprintf)
 libc_hidden_proto (sscanf)
+#endif
+extern __typeof (dprintf) __dprintf
+__attribute__ ((__format__ (__printf__, 2, 3)));
+libc_hidden_proto (__dprintf)
+
 libc_hidden_proto (fwrite)
 libc_hidden_proto (perror)
 libc_hidden_proto (remove)
