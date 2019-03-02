@@ -1,3 +1,24 @@
+2019-03-02    <bert.tenjy@gmail.com>
+
+	[BZ #24205]
+	* sysdeps/powerpc/bits/math-vector.h: New file.
+	* sysdeps/powerpc/fpu/libm-test-ulps (cos_vlen2): Regenerated.
+	* sysdeps/powerpc/powerpc64/fpu/Makefile: New file.
+	* sysdeps/powerpc/powerpc64/fpu/Versions: Likewise.
+	* sysdeps/powerpc/powerpc64/fpu/configure: Generated.
+	* sysdeps/powerpc/powerpc64/fpu/configure.ac: New file.
+	* sysdeps/powerpc/powerpc64/fpu/math-tests-arch.h: New file.
+	* sysdeps/powerpc/powerpc64/fpu/multiarch/Makefile (libmvec-sysdep_routines)
+	(CFLAGS-vec_d_cos2_vsx.c, libmvec-tests, double-vlen2-funcs)
+	(double-vlen2-arch-ext-cflags): Added build of VSX vector cos function
+	and its tests.
+	* sysdeps/powerpc/powerpc64/fpu/multiarch/test-double-vlen2-wrappers.c: New file.
+	* sysdeps/powerpc/powerpc64/fpu/multiarch/vec_d_cos2_vsx.c: Likewise.
+	* sysdeps/powerpc/powerpc64/fpu/multiarch/vec_d_trig_data.h: Likewise.
+	* sysdeps/powerpc/powerpc64/fpu/vec_finite_alias.c: Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/libmvec.abilist: Likewise.
+
+
 2019-03-05  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
 
 	* nptl/nptl-init.c (__have_futex_clock_realtime,
