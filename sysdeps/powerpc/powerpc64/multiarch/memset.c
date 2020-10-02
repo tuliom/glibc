@@ -46,15 +46,16 @@ libc_ifunc (__libc_memset,
 	     && hwcap & PPC_FEATURE_HAS_VSX)
 	    ? __memset_power10 :
 # endif
-            (hwcap2 & PPC_FEATURE2_ARCH_2_07)
-            ? __memset_power8 :
-	      (hwcap & PPC_FEATURE_HAS_VSX)
-	      ? __memset_power7 :
-		(hwcap & PPC_FEATURE_ARCH_2_05)
-		? __memset_power6 :
-		  (hwcap & PPC_FEATURE_POWER4)
-		  ? __memset_power4
-            : __memset_ppc);
+	    (hwcap2 & PPC_FEATURE2_ARCH_2_07
+	     && hwcap & PPC_FEATURE_HAS_VSX)
+	    ? __memset_power8 :
+	    (hwcap & PPC_FEATURE_HAS_VSX)
+	    ? __memset_power7 :
+	    (hwcap & PPC_FEATURE_ARCH_2_05)
+	    ? __memset_power6 :
+	    (hwcap & PPC_FEATURE_POWER4)
+	    ? __memset_power4
+	    : __memset_ppc);
 
 #undef memset
 strong_alias (__libc_memset, memset);

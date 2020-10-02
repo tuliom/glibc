@@ -45,7 +45,8 @@ libc_ifunc (__libc_memcpy,
 	    (hwcap2 & PPC_FEATURE2_ARCH_3_1 && hwcap & PPC_FEATURE_HAS_VSX)
 	    ? __memcpy_power10 :
 # endif
-	    ((hwcap2 & PPC_FEATURE2_ARCH_2_07) && use_cached_memopt)
+	    ((hwcap2 & PPC_FEATURE2_ARCH_2_07 && hwcap & PPC_FEATURE_HAS_VSX)
+	     && use_cached_memopt)
 	    ? __memcpy_power8_cached :
 	      (hwcap & PPC_FEATURE_HAS_VSX)
 	      ? __memcpy_power7 :
