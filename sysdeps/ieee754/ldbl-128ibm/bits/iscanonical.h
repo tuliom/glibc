@@ -50,7 +50,7 @@ extern "C++" {
 inline int iscanonical (float __val) { return __iscanonicalf (__val); }
 inline int iscanonical (double __val) { return __iscanonical (__val); }
 inline int iscanonical (long double __val) { return __iscanonicall (__val); }
-#  if __HAVE_DISTINCT_FLOAT128
+#  if __HAVE_DISTINCT_FLOAT128 && __LDBL_MANT_DIG__ != 113
 inline int iscanonical (_Float128 __val) { return __iscanonicalf128 (__val); }
 #  endif
 }
