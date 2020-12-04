@@ -11,40 +11,10 @@ ibm128-abi-CFLAGS := -mabi=ibmlongdouble
 type-ldouble-CFLAGS += $(ibm128-abi-CFLAGS)
 no-gnu-attribute-CFLAGS = -mno-gnu-attribute
 
-# This is a very gnarly workaround to static libgcc providing a .gnu.attribute
-# in ibm128 functions.  This is not a bug in static libgcc as normal users
-# should only ever link ibm128 or ieee128 routines, never both.  We are the
-# exception which allows the decision to be deferred to user libraries or
-# applications.
-#
-# We built an object file and extract the desired .gnu.attributes section
-# to be inserted into lib{c,m}.so.
 ifeq ($(build-shared),yes)
 
 # Build everything with IEEE 128-bit long double.
 sysdep-CFLAGS += -mabi=ieeelongdouble -Wno-psabi $(no-gnu-attribute-CFLAGS)
-
-before-compile += $(common-objpfx)no_ldbl_gnu_attribute.bin
-
-$(common-objpfx)no_ldbl_gnu_attribute.bin: $(..)sysdeps/powerpc/powerpc64/le/no_ldbl_gnu_attribute.c
-	$(filter-out $(no-gnu-attribute-CFLAGS),$(compile.c)) -o $(basename $@).o
-	$(OBJCOPY) --dump-section=.gnu.attributes=$@.tmp $(basename $@).o
-	mv $@.tmp $@
-
-define after-link
-if [ ! -z "$(filter libm.so libc.so,$(notdir $1))" ]; then \
-  echo "Replacing .gnu.attributes in $1"; \
-  $(OBJCOPY) --update-section=.gnu.attributes=$(common-objpfx)no_ldbl_gnu_attribute.bin $1; \
-fi
-endef
-
-# Ensure a .gnu.attributes section is present by building an ibm128 file with
-# -mgnu-attribute in both libm and libc shared libraries.  Prior to GCC 11 this
-# section was implicitly included via static libgcc ibm128 routines.
-ifeq ($(subdir),math)
-$(objpfx)m_ldexpl.os: CFLAGS += -mgnu-attribute
-$(objpfx)s_ldexpl.os: CFLAGS += -mgnu-attribute
-endif
 
 endif # ifeq ($(build-shared),yes)
 endif # ifeq ($(ibm128-fcts),yes)
