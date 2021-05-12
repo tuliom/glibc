@@ -35,17 +35,21 @@ libc_ifunc (__bzero,
 # ifdef __LITTLE_ENDIAN__
 	    (hwcap2 & PPC_FEATURE2_ARCH_3_1
 	     && hwcap2 & PPC_FEATURE2_HAS_ISEL
-	     && hwcap & PPC_FEATURE_HAS_VSX)
+	     && hwcap & PPC_FEATURE_HAS_VSX
+	     && __GLRO(dl_cache_line_size) == 0x80)
 	    ? __bzero_power10 :
 # endif
 	    (hwcap2 & PPC_FEATURE2_ARCH_2_07
-	     && hwcap & PPC_FEATURE_HAS_VSX)
+	     && hwcap & PPC_FEATURE_HAS_VSX
+	     && __GLRO(dl_cache_line_size) == 0x80)
 	    ? __bzero_power8 :
-	    (hwcap & PPC_FEATURE_HAS_VSX)
+	    (hwcap & PPC_FEATURE_HAS_VSX
+	     && __GLRO(dl_cache_line_size) == 0x80)
 	    ? __bzero_power7 :
-	    (hwcap & PPC_FEATURE_ARCH_2_05)
+	    (hwcap & PPC_FEATURE_ARCH_2_05
+	     && __GLRO(dl_cache_line_size) == 0x80)
 	    ? __bzero_power6 :
-	    (hwcap & PPC_FEATURE_POWER4)
+	    (hwcap & PPC_FEATURE_POWER4 && __GLRO(dl_cache_line_size) == 0x80)
 	    ? __bzero_power4
 	    : __bzero_ppc);
 
