@@ -193,6 +193,10 @@ CFLAGS-tst-minstack-throw.cc += -mno-float128
 endif
 
 ifeq ($(subdir),elf)
+# Reduce the performance in the loader by avoiding to use SIMD instructions in
+# order to help processors that do not implement all of the POWER ISA 2.07.
++cflags += -mno-altivec -mno-vsx
+
 $(objpfx)tst-glibc-hwcaps: \
   $(objpfx)libmarkermod2-1.so $(objpfx)libmarkermod3-1.so
 $(objpfx)tst-glibc-hwcaps.out: \
@@ -219,3 +223,9 @@ tests-container += tst-glibc-hwcaps-cache
 endif
 
 endif # $(subdir) == elf
+
+ifeq ($(subdir),string)
+# Reduce the performance in string functions written in C by avoiding to use
+# SIMD instructions in order to help processors that do not implement SIMD.
++cflags += -mno-altivec -mno-vsx
+endif
