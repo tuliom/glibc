@@ -3,9 +3,10 @@ ifeq ($(subdir),math)
 #
 # Only enable ifunc _Float128 support if the baseline cpu support
 # is older than power9.
-ifneq (yes,$(libc-submachine-power9))
-do_f128_multiarch = yes
-endif
+# Disable ifunc.
+#ifneq (yes,$(libc-submachine-power9))
+#do_f128_multiarch = yes
+#endif
 
 #
 # This is an ugly, but contained, mechanism to provide hardware optimized

@@ -22,7 +22,10 @@ no-gnu-attribute-CFLAGS = -mno-gnu-attribute
 ifeq ($(build-shared),yes)
 
 # Build everything with IEEE 128-bit long double.
-sysdep-CFLAGS += -mabi=ieeelongdouble -Wno-psabi $(no-gnu-attribute-CFLAGS)
+#sysdep-CFLAGS += -mabi=ieeelongdouble -Wno-psabi $(no-gnu-attribute-CFLAGS)
+# We need to build the core files without SIMD support.  That means we can't
+# build them with IEEE 128-bit floating point.
+sysdep-CFLAGS += -Wno-psabi $(no-gnu-attribute-CFLAGS)
 
 before-compile += $(common-objpfx)no_ldbl_gnu_attribute.bin
 
