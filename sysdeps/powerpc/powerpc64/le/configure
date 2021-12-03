@@ -32,6 +32,11 @@ if test "$libc_cv_target_power8_ok" != "yes"; then :
 fi
 CFLAGS="$OLD_CFLAGS"
 
+# Static PIE is supported.
+$as_echo "#define SUPPORT_STATIC_PIE 1" >>confdefs.h
+
+
+
 OLD_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -mno-gnu-attribute"
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if the compiler supports -mno-gnu-attribute" >&5

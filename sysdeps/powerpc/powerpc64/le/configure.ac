@@ -17,6 +17,10 @@ AS_IF([test "$libc_cv_target_power8_ok" != "yes"],
       [critic_missing="$critic_missing POWER8 or newer is required on powerpc64le."])
 CFLAGS="$OLD_CFLAGS"
 
+# Static PIE is supported.
+AC_DEFINE(SUPPORT_STATIC_PIE)
+
+
 dnl Require support for -mno-gnu-attribute
 OLD_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -mno-gnu-attribute"
