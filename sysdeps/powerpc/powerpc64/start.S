@@ -42,46 +42,75 @@
 #undef cfi_endproc
 #define cfi_endproc
 
- /* These are the various addresses we require.  */
-#ifdef PIC
-	.section ".data.rel.ro.local","aw"
+#if _CALL_ELF == 2
+# define FRAME_SIZE		(FRAME_MIN_SIZE+32)
+# define SDA_BASE_OFFSET	32
+# define MAIN_OFFSET		40
+# define INIT_OFFSET		48
+# define FINI_OFFSET		56
 #else
-	.section ".rodata"
+# define FRAME_SIZE		(FRAME_MIN_SIZE+32)
+# define SDA_BASE_OFFSET	112
+# define MAIN_OFFSET		120
+# define INIT_OFFSET		128
+# define FINI_OFFSET		136
 #endif
-	.align	3
-L(start_addresses):
-	.quad	0 /* was _SDA_BASE_  but not in 64-bit ABI*/
-/*     function descriptors so don't need JUMPTARGET */
-	.quad	main
-	.quad 	0 /* Used to be init.  */
-	.quad 	0 /* Used to be fini.  */
-
-	ASM_SIZE_DIRECTIVE(L(start_addresses))
-
 	.section	".toc","aw"
 .L01:
-	.tc	L(start_addresses)[TC],L(start_addresses)
+	.tc	main[TC],main
 	.section ".text"
+/* Initialize the stack and prepare the arguments for the following call:
+   __libc_start_main_impl (int argc (r3),
+			   char **argv (r4),
+			   char **ev (r5),
+			   void * auxvec (r6),
+			   void (*rtld_fini) (void) (r7),
+			   struct startup_info *stinfo (r8),
+			   char **stack_on_entry (r9));  */
 ENTRY (_start)
  /* Save the stack pointer, in case we're statically linked under Linux.  */
 	mr	r9,r1
  /* Set up an initial stack frame, and clear the LR.  */
 	clrrdi	r1,r1,4
 	li	r0,0
-	stdu	r1,-128(r1)
+	stdu	r1,-FRAME_SIZE(r1)
 	mtlr	r0
 	std	r0,0(r1)
 
- /* put the address of start_addresses in r8...  **
-** PPC64 ABI uses R13 for thread local, so we leave it alone */
+#if defined SHARED || _CALL_ELF == 1
 	ld	r8,.L01@toc(r2)
+#else
+/* Avoid depending on a runtime relocation too early for the static case.  Get
+   an address that is guaranteed to be available at this moment and defer the
+   relocation.  */
+	addi	r8,r12,L(__wrap_main)-BODY_LABEL(_start)
+#endif
+	/* Save struct startup_info in the stack.  */
+	std	r0,SDA_BASE_OFFSET(r1)
+	std	r8,MAIN_OFFSET(r1)
+	std	r0,INIT_OFFSET(r1)
+	std	r0,FINI_OFFSET(r1)
 
- /* and continue in libc-start, in glibc.  */
+	addi	r8,r1,SDA_BASE_OFFSET
+
+/* and continue in libc-start, in glibc.  */
 	b	JUMPTARGET(__libc_start_main)
 /* Older versions of ld need this nop to recognize that it's OK to call via a
    TOC adjusting stub.  */
 	nop
 
+#if !defined SHARED
+/* Relocations have already been applied and we can get main's address now.
+   Note: in powerpc64, this file is always built as PIC.  */
+L(__wrap_main):
+/* Rebuild the TOC pointer because __libc_start_main may be defined in a
+   shared library.  */
+	addis	r2,r12,.TOC.-L(__wrap_main)@ha
+	addi	r2,r2,.TOC.-L(__wrap_main)@l
+	ld	r12,.L01@toc(r2)
+	mtctr	r12
+	bctr
+#endif
 END(_start)
 
 /* Define a symbol for the first piece of initialized data.  */

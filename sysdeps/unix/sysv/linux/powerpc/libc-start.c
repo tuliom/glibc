@@ -98,5 +98,7 @@ __libc_start_main_impl (int argc, char **argv,
   return generic_start_main (stinfo->main, argc, argv, auxvec,
 			     stinfo->init, stinfo->fini, rtld_fini,
 			     stack_on_entry);
+
 }
+
 DEFINE_LIBC_START_MAIN_VERSION
